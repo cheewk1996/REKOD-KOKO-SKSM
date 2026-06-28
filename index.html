@@ -1,31 +1,3083 @@
 <!DOCTYPE html>
-<html>
+<html lang="ms">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- IMPORTANT for iPhone full screen -->
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>PORKO-SKSM</title>
+  <meta name="apple-mobile-web-app-title" content="Attendance App">
+  <link rel="apple-touch-icon" href="https://i.imgur.com/LWnJWwH.png">
+
+  <meta charset="UTF-8">
+  <title>Portal Kokurikulum & PAJSK Sekolah</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .section-view {
+      display: none;
+    }
+    .section-view.active {
+      display: block;
+    }
+    
+    /* Animasi permulaan bebas kelipan (Flickerless Float-in) */
+    .animasi-awal {
+      opacity: 0;
+    }
+    @keyframes floatIn {
+      0% { opacity: 0; transform: translateY(20px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-float {
+      animation: floatIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  </style>
 </head>
-<body>
-<h1>My School Web App</h1>
-<p id="output">Loading...</p>
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
-function handleResponse(data) {
-  document.getElementById("output").innerText =
-    data.message || "No message";
-}
-function loadData() {
-  const script = document.createElement("script");
-  script.src = API_URL + "?callback=handleResponse";
-  script.onerror = function () {
-    document.getElementById("output").innerText =
-      "Failed to load API";
-  };
-  document.body.appendChild(script);
-}
-window.onload = loadData;
-</script>
+<body class="bg-slate-50 font-sans text-slate-800">
+
+  <!-- LOADING SPINNER -->
+  <div id="loader" class="hidden fixed inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-60">
+    <div class="flex flex-col items-center bg-white p-6 rounded-3xl shadow-xl border border-slate-100">
+      <i class="fa-solid fa-circle-notch animate-spin text-4xl text-indigo-600 mb-3"></i>
+      <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Sedang memproses...</p>
+    </div>
+  </div>
+
+  <!-- ================= LOG MASUK PAGE ================= -->
+  <div id="loginPage" 
+       class="min-h-screen flex items-center justify-center px-4 relative bg-cover bg-center bg-no-repeat"
+       style="background-image: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://i.imgur.com/lFsGXgS.jpg');">
+    
+    <div class="bg-white/95 backdrop-blur-md p-8 rounded-3xl shadow-2xl w-full max-w-md border border-white/20 animasi-awal animate-float"
+         style="animation-delay: 0.0s;">
+      <div class="text-center mb-8">
+        <div class="mb-4">
+          <img src="https://i.imgur.com/LWnJWwH.png" alt="Logo Sekolah" class="mx-auto h-24 w-24 object-contain">
+        </div>
+        <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">PORTAL REKOD KOKU</h1>
+        <p class="text-sm text-slate-500 font-medium">Sesi Akademik 2026 [v1.4]</p>
+      </div>
+
+      <div id="loginAlert" class="hidden mb-6 p-4 rounded-xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-100 text-center"></div>
+
+      <form id="formLogin" onsubmit="handleLogin(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">No. Kad Pengenalan (IC)</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+              <i class="fa-solid fa-id-card"></i>
+            </span>
+            <input type="text" id="loginIc" placeholder="Contoh: 100303037777" required
+              class="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-medium transition">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Kata Laluan</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+              <i class="fa-solid fa-lock"></i>
+            </span>
+            <input type="password" id="loginPass" placeholder="******" minlength="6" maxlength="12" required
+              class="w-full pl-12 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-medium transition">
+            <button type="button" onclick="togglePasswordVisibility('loginPass')" class="absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400 hover:text-indigo-600 transition">
+              <i class="fa-regular fa-eye" id="eye-icon-loginPass"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" id="btnLogin" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-2xl transition duration-300 text-sm shadow-lg shadow-indigo-600/20">
+          MASUK PORTAL <i class="fa-solid fa-right-to-bracket ml-1.5"></i>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ================= PORTAL UTAMA ================= -->
+  <div id="appPortal" class="hidden min-h-screen flex flex-col md:flex-row">
+    
+    <!-- MENU SEBELAH KIRI (SIDEBAR) -->
+    <aside id="sidebar" class="bg-slate-900 text-slate-300 w-full md:w-64 min-h-0 md:min-h-screen flex flex-col justify-between transition-all duration-300 relative z-20 shadow-xl">
+      <div id="sidebarGroup" class="w-full md:w-64 transition-all duration-300">
+        
+        <div class="p-5 flex items-center justify-between border-b border-slate-800">
+          <span class="font-extrabold text-white text-lg tracking-wider sidebar-text"><i class="fa-solid fa-school text-indigo-400 mr-2"></i>E-KOKU</span>
+          
+          <button onclick="toggleMobileMenu()" class="flex md:hidden text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 focus:outline-none transition">
+            <i id="mobileMenuIcon" class="fa-solid fa-bars text-lg"></i>
+          </button>
+
+          <button onclick="toggleSidebar()" class="hidden md:block text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 focus:outline-none transition">
+            <i class="fa-solid fa-bars-staggered text-lg"></i>
+          </button>
+        </div>
+
+        <div id="menuContent" class="hidden md:block transition-all duration-300">
+          
+          <div onclick="openProfileModal()" class="m-3 p-4 bg-slate-800/40 rounded-2xl border border-slate-800/60 cursor-pointer hover:bg-slate-800 transition flex items-center space-x-3">
+            <div class="relative flex-shrink-0">
+              <img id="sidePic" src="https://placehold.co/100x100?text=Profil" alt="Profil" class="w-11 h-11 rounded-2xl border-2 border-indigo-500 object-cover">
+              <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-400 ring-2 ring-slate-900"></span>
+            </div>
+            <div class="overflow-hidden sidebar-text">
+              <h4 id="sideName" class="font-bold text-white text-sm truncate">Nama Pengguna</h4>
+              <span id="sideRole" class="text-[10px] text-indigo-400 font-bold tracking-wider uppercase">PERANAN</span>
+            </div>
+          </div>
+
+          <nav class="p-3 space-y-1">
+            <a href="#" onclick="showSection('sectionDashboard'); tutupMenuMobileSelepasKlik()" class="menu-item flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-chart-pie w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Dashboard</span>
+            </a>
+            <a href="#" id="menuMaklumatMurid" onclick="showSection('sectionMaklumat'); tutupMenuMobileSelepasKlik()" class="menu-item flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-user-graduate w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Maklumat Murid</span>
+            </a>
+            <a href="#" id="menuAdminKehadiran" onclick="showSection('sectionAdminKehadiran'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-square-poll-vertical w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Kehadiran (Admin)</span>
+            </a>
+            <a href="#" id="menuKehadiran" onclick="showSection('sectionKehadiran'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-clipboard-check w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Kehadiran</span>
+            </a>
+            <a href="#" id="menuPerjumpaan" onclick="showSection('sectionPerjumpaan'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-calendar-days w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Laporan Perjumpaan</span>
+            </a>
+            <a href="#" id="menuJawatan" onclick="showSection('sectionJawatan'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-medal w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Jawatan Ahli</span>
+            </a>
+            <a href="#" id="menuDataPengguna" onclick="showSection('sectionPengguna'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-users w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Data Pengguna & Guru</span>
+            </a>
+            <a href="#" id="menuPengurusanKoko" onclick="showSection('sectionPengurusanKoko'); tutupMenuMobileSelepasKlik()" class="menu-item hidden flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-folder-open w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Pengurusan Koko</span>
+            </a>
+            <a href="#" id="menuPencapaian" onclick="showSection('sectionPencapaian'); tutupMenuMobileSelepasKlik()" class="menu-item flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-trophy w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Pencapaian</span>
+            </a>
+            <a href="#" onclick="showSection('sectionPAJSK'); tutupMenuMobileSelepasKlik()" class="menu-item flex items-center px-4 py-3 rounded-xl text-sm font-medium hover:bg-slate-800 hover:text-white transition">
+              <i class="fa-solid fa-file-invoice w-5 text-center text-lg text-indigo-400"></i>
+              <span class="ml-3.5 sidebar-text">Rumusan PAJSK</span>
+            </a>
+          </nav>
+          
+          <div class="p-4 border-t border-slate-800">
+            <button onclick="handleLogout()" class="w-full flex items-center px-4 py-3 text-sm font-bold text-rose-400 hover:bg-rose-950/30 hover:text-rose-300 rounded-2xl transition">
+              <i class="fa-solid fa-right-from-bracket w-5 text-center text-lg"></i>
+              <span class="ml-3.5 sidebar-text">Keluar Portal</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </aside>
+
+    <!-- KAWASAN KANDUNGAN SEBELAH KANAN -->
+    <main class="flex-1 min-h-screen overflow-y-auto p-6 md:p-10 font-sans">
+      
+      <!-- Top Bar Portal -->
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-5 border-b border-slate-200">
+        <div>
+          <h2 id="headerTitle" class="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Utama</h2>
+          <p id="headerSub" class="text-sm text-slate-500 font-medium mt-1">Sila layari menu di sebelah kiri untuk tindakan.</p>
+        </div>
+        <div id="loaderStatus" class="hidden flex items-center space-x-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-2xl border border-indigo-100 text-xs font-bold animate-pulse shadow-sm">
+          <i class="fa-solid fa-spinner animate-spin text-sm"></i>
+          <span>Memproses Maklumat...</span>
+        </div>
+      </header>
+
+      <!-- 1. DASHBOARD -->
+      <section id="sectionDashboard" class="section-view active space-y-6">
+        <div id="adminStatsGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between transition hover:shadow-md">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Murid Terdaftar</p>
+              <h3 id="statTotalMurid" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+            </div>
+            <div class="text-2xl text-blue-600 bg-blue-50 p-4 rounded-2xl"><i class="fa-solid fa-user-graduate"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between transition hover:shadow-md">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Guru Berdaftar</p>
+              <h3 id="statTotalGuru" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+            </div>
+            <div class="text-2xl text-emerald-600 bg-emerald-50 p-4 rounded-2xl"><i class="fa-solid fa-user-tie"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between transition hover:shadow-md">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pencapaian Johan-Kelima</p>
+              <h3 id="statTotalPencapaian" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+            </div>
+            <div class="text-2xl text-amber-500 bg-yellow-50 p-4 rounded-2xl"><i class="fa-solid fa-award"></i></div>
+          </div>
+          <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center justify-between transition hover:shadow-md">
+            <div>
+              <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Penyertaan Aktiviti</p>
+              <h3 id="statTotalPenyertaan" class="text-3xl font-black text-slate-800 mt-1">0</h3>
+            </div>
+            <div class="text-2xl text-purple-600 bg-purple-50 p-4 rounded-2xl"><i class="fa-solid fa-users"></i></div>
+          </div>
+        </div>
+
+        <div id="generalStatsCard" class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-lg font-black text-slate-900 mb-6 flex items-center"><i class="fa-solid fa-chart-line text-indigo-500 mr-2.5"></i>Prestasi Kokurikulum Mengikut Peringkat</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-100">
+                  <th class="p-4 font-bold rounded-l-2xl">Peringkat Kejohanan</th>
+                  <th class="p-4 font-bold text-center text-yellow-600">Johan</th>
+                  <th class="p-4 font-bold text-center text-slate-500">Naib Johan</th>
+                  <th class="p-4 font-bold text-center text-amber-700">Ketiga</th>
+                  <th class="p-4 font-bold text-center">Ke-4 / Ke-5</th>
+                  <th class="p-4 font-bold text-center text-blue-600 rounded-r-2xl">Penyertaan</th>
+                </tr>
+              </thead>
+              <tbody id="tblRingkasanPeringkat" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="adminChartsGrid" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Murid Mengikut Kaum</h4>
+            <div class="h-60 flex justify-center items-center"><canvas id="chartKaum"></canvas></div>
+          </div>
+          <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Murid Mengikut Agama</h4>
+            <div class="h-60 flex justify-center items-center"><canvas id="chartAgama"></canvas></div>
+          </div>
+          <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 text-center">Unit Uniform Pilihan</h4>
+            <div class="h-60 flex justify-center items-center"><canvas id="chartUniform"></canvas></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. MAKLUMAT MURID -->
+      <section id="sectionMaklumat" class="section-view hidden space-y-6">
+        <div id="carianMuridControl" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <input type="text" id="cariMuridKeyword" placeholder="Cari nama atau No. IC..." 
+              class="px-5 py-3 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none w-full sm:w-64 bg-slate-50">
+            <select id="cariMuridKelas" 
+              class="px-4 py-3 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-slate-50">
+              <option value="">Semua Kelas</option>
+              <option value="4 SEROJA">4 SEROJA</option><option value="4 TULIP">4 TULIP</option><option value="4 MAWAR">4 MAWAR</option><option value="4 ANGGERIK">4 ANGGERIK</option><option value="4 RAYA">4 RAYA</option>
+              <option value="5 SEROJA">5 SEROJA</option><option value="5 TULIP">5 TULIP</option><option value="5 MAWAR">5 MAWAR</option><option value="5 ANGGERIK">5 ANGGERIK</option><option value="5 RAYA">5 RAYA</option>
+              <option value="6 SEROJA">6 SEROJA</option><option value="6 TULIP">6 TULIP</option><option value="6 MAWAR">6 MAWAR</option><option value="6 ANGGERIK">6 ANGGERIK</option><option value="6 RAYA">6 RAYA</option>
+            </select>
+            <button onclick="pencarianMaklumatMurid()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/10">
+              <i class="fa-solid fa-magnifying-glass mr-2"></i> Cari
+            </button>
+          </div>
+          <button id="btnTambahMurid" onclick="bukaModalMurid()" class="hidden w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm">
+            <i class="fa-solid fa-plus mr-2"></i> Daftar Murid Baharu
+          </button>
+        </div>
+
+        <div id="detailMuridSendiri" class="hidden bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 max-w-3xl mx-auto space-y-6">
+          <div class="flex items-center space-x-5 border-b border-slate-100 pb-5">
+            <div class="text-4xl text-indigo-600 bg-indigo-50 p-5 rounded-2xl"><i class="fa-solid fa-address-card"></i></div>
+            <div>
+              <h3 id="msNama" class="text-xl font-extrabold text-slate-800">Nama Penuh Murid</h3>
+              <p id="msKelas" class="text-xs text-indigo-500 font-bold uppercase tracking-wider mt-1">Kelas: -</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+            <div class="space-y-3.5">
+              <div><span class="text-xs font-bold text-slate-400 uppercase tracking-wide">No. Kad Pengenalan</span><p id="msIc" class="text-lg font-black text-indigo-600 tracking-wider mt-1">-</p></div>
+              <div><span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Kaum & Agama</span><p id="msKaumAgama" class="font-bold text-slate-800 mt-1">-</p></div>
+              <div><span class="text-xs font-bold text-slate-400 uppercase tracking-wide">Telefon Ibu Bapa / Penjaga</span><p id="msTelefon" class="font-bold text-slate-800 mt-1">-</p></div>
+            </div>
+            <div class="border-t md:border-t-0 md:border-l border-slate-100 pt-5 md:pt-0 md:pl-6 space-y-3">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wide block">Pendaftaran Unit Kokurikulum (Daftar / Lapor)</span>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 font-bold uppercase">Uniform</span><p id="msUniform" class="font-bold text-slate-700 text-xs mt-1">-</p></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 font-bold uppercase">Kelab</span><p id="msKelab" class="font-bold text-slate-700 text-xs mt-1">-</p></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 font-bold uppercase">Sukan</span><p id="msSukan" class="font-bold text-slate-700 text-xs mt-1">-</p></div>
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-100"><span class="text-[10px] text-slate-400 font-bold uppercase">Rumah Sukan</span><p id="msRumah" class="font-bold text-slate-700 text-xs mt-1">-</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tableMuridContainer" class="hidden bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-gray-200">
+                  <th class="p-4 font-semibold">Nama Murid / Kelas / IC</th>
+                  <th class="p-4 font-semibold">Biodata</th>
+                  <th class="p-4 font-semibold">Kokurikulum Terdaftar</th>
+                  <th class="p-4 font-semibold text-center">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="tblMuridBody" class="divide-y divide-gray-100 text-gray-700">
+                <tr><td colspan="4" class="p-10 text-center text-slate-400 font-medium">Sila gunakan kotak carian di atas untuk memaparkan senarai murid.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. DATA PENGGUNA & SENARAI GURU -->
+      <section id="sectionPengguna" class="section-view hidden space-y-6">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-lg font-black text-slate-800 mb-6 flex items-center"><i class="fa-solid fa-users-gear text-indigo-500 mr-2.5"></i>Senarai Guru & Unit Kokurikulum Kendalian</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-gray-200">
+                  <th class="p-4">Nama Guru</th>
+                  <th class="p-4">Peranan Portal</th>
+                  <th class="p-4">Unit Kokurikulum Ditugaskan</th>
+                </tr>
+              </thead>
+              <tbody id="tblSenaraiGuru" class="divide-y divide-gray-100 text-gray-700"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4A. STATISTIK KEHADIRAN (ADMIN SAHAJA) -->
+      <section id="sectionAdminKehadiran" class="section-view hidden space-y-6">
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <span class="text-sm font-bold text-slate-700">Tapis Tahun Ahli Koko:</span>
+            <select id="adminKhdTahun" onchange="paparAdminKehadiran()" class="px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="Semua">Semua Tahun (Tahun 4, 5, 6)</option>
+              <option value="4">Tahun 4</option>
+              <option value="5">Tahun 5</option>
+              <option value="6">Tahun 6</option>
+            </select>
+          </div>
+          <div class="text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-100">
+            Format: {Hadir} / {Jumlah Ahli Terdaftar}
+          </div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left border-collapse whitespace-nowrap">
+              <thead>
+                <tr class="bg-slate-900 text-slate-300 border-b border-slate-800">
+                  <th class="p-4 font-bold text-sm">Kategori & Unit Kokurikulum</th>
+                  <th class="p-2 text-center border-l border-slate-800 w-12 font-bold text-[10px]">P1</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P2</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P3</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P4</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P5</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P6</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P7</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P8</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P9</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P10</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P11</th>
+                  <th class="p-2 text-center w-12 font-bold text-[10px]">P12</th>
+                </tr>
+              </thead>
+              <tbody id="tblAdminKhdBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4B. LAPOR KEHADIRAN (GURU/MURID) -->
+      <section id="sectionKehadiran" class="section-view hidden space-y-6">
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100">
+          <div class="flex flex-col sm:flex-row items-end gap-5">
+            <div class="w-full sm:w-auto">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Unit Koko Kendalian</label>
+              <select id="selKokoKehadiran" class="w-full sm:w-64 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+            </div>
+            <div class="w-full sm:w-auto">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tapis Tahun</label>
+              <select id="selTapisTahun" class="w-full sm:w-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="SEMUA">Semua Tahun</option>
+                <option value="4">Tahun 4</option>
+                <option value="5">Tahun 5</option>
+                <option value="6">Tahun 6</option>
+              </select>
+            </div>
+            <div id="divPilihPerjumpaan" class="hidden w-full sm:w-auto">
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Bilangan Perjumpaan</label>
+              <select id="selBilPerjumpaan" class="w-full sm:w-36 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
+                <option value="1">Perjumpaan 1</option><option value="2">Perjumpaan 2</option><option value="3">Perjumpaan 3</option><option value="4">Perjumpaan 4</option>
+                <option value="5">Perjumpaan 5</option><option value="6">Perjumpaan 6</option><option value="7">Perjumpaan 7</option><option value="8">Perjumpaan 8</option>
+                <option value="9">Perjumpaan 9</option><option value="10">Perjumpaan 10</option><option value="11">Perjumpaan 11</option><option value="12">Perjumpaan 12</option>
+              </select>
+            </div>
+            <button onclick="paparKehadiranAhliGuru()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/10">
+              <i class="fa-solid fa-eye mr-2"></i> Papar Senarai Ahli
+            </button>
+          </div>
+        </div>
+
+        <!-- NOTIFIKASI MANUAL MURID -->
+        <div id="boxNotifikasiKehadiran" class="hidden p-4 rounded-2xl font-bold text-xs uppercase tracking-wider"></div>
+
+         <!-- KOTAK INFO JAWATAN & GURU PENASIHAT -->
+        <div id="cardInfoMurid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div class="bg-white p-4 rounded-xl border border-blue-100 flex items-center space-x-3 shadow-sm">
+            <div class="p-3 bg-blue-100 text-blue-600 rounded-lg"><i class="fa-solid fa-id-card text-xl"></i></div>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Nama Anda</p>
+              <p id="lblInfoNama" class="text-sm font-bold text-slate-800 break-words">Memuatkan...</p>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-purple-100 flex items-center space-x-3 shadow-sm">
+            <div class="p-3 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-chalkboard-user text-xl"></i></div>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Kelas</p>
+              <p id="lblInfoKelas" class="text-sm font-bold text-slate-800 break-words">Memuatkan...</p>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-indigo-100 flex items-center space-x-3 shadow-sm">
+            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-lg"><i class="fa-solid fa-medal text-xl"></i></div>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Jawatan</p>
+              <p id="lblInfoJawatan" class="text-sm font-bold text-slate-800 break-words">Memuatkan...</p>
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-xl border border-emerald-100 flex items-center space-x-3 shadow-sm">
+            <div class="p-3 bg-emerald-100 text-emerald-600 rounded-lg"><i class="fa-solid fa-user-tie text-xl"></i></div>
+            <div class="overflow-hidden">
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Guru Penasihat</p>
+              <p id="lblInfoGuru" class="text-sm font-bold text-slate-700 break-words">Memuatkan...</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="kehadiranTableContainer" class="hidden bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="p-5 md:p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center bg-indigo-50/20 gap-3">
+            <div>
+              <h3 id="kehadiranUnitTitle" class="text-lg font-black text-slate-800">Senarai Kehadiran Ahli</h3>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">Sila tandakan kehadiran ahli bagi perjumpaan yang dipilih.</p>
+            </div>
+            <button id="btnSaveKehadiranAllTop" onclick="simpanKehadiranSatuPerjumpaan()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-lg shadow-indigo-600/10"></button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead id="tblKehadiranHeader"></thead>
+              <tbody id="tblKehadiranBody" class="divide-y divide-slate-100 text-slate-700 font-semibold"></tbody>
+            </table>
+          </div>
+          <div class="p-5 md:p-6 border-t border-slate-100 flex justify-end bg-indigo-50/20">
+            <button id="btnSaveKehadiranAllBottom" onclick="simpanKehadiranSatuPerjumpaan()" class="hidden bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-lg shadow-indigo-600/10"></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= 4D. SEKSYEN PERJUMPAAN (BAHARU) ================= -->
+      <section id="sectionPerjumpaan" class="section-view hidden space-y-6">
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-3 w-full sm:w-auto">
+            <span class="text-sm font-bold text-slate-700">Tapis Unit Koko:</span>
+            <select id="selKokoPerjumpaan" onchange="tapisLaporanPerjumpaan()" class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
+              <option value="">-- Pilih Unit Kokurikulum --</option>
+            </select>
+          </div>
+          <button id="btnTambahPerjumpaan" onclick="bukaModalPerjumpaan()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/10">
+            <i class="fa-solid fa-plus mr-2"></i> Isi Laporan Perjumpaan
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 text-xs font-bold">
+                  <th class="p-4 w-16 text-center">Bil.</th>
+                  <th class="p-4">Tarikh & Tajuk</th>
+                  <th class="p-4">Keterangan Aktiviti / Catatan</th>
+                  <th class="p-4">Statistik Kehadiran Ahli (Hadir/Jumlah)</th>
+                  <th class="p-4">Guru Penasihat Hadir</th>
+                  <th class="p-4 text-center">Dokumen/Media</th>
+                  <th class="p-4 text-center">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="tblPerjumpaanBody" class="divide-y divide-slate-100 text-slate-700 font-medium">
+                <tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Sila pilih unit kokurikulum di atas terlebih dahulu.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4C. KEMASKINI JAWATAN AHLI (GURU ONLY) -->
+      <section id="sectionJawatan" class="section-view hidden space-y-6">
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-end gap-4">
+          <div class="w-full sm:w-auto">
+            <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Unit Koko Kendalian</label>
+            <select id="selKokoJawatan" class="w-full sm:w-64 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+          </div>
+          <button onclick="paparJawatanAhli()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm">
+            <i class="fa-solid fa-users mr-2"></i> Papar Ahli & Jawatan
+          </button>
+        </div>
+
+        <div id="jawatanTableContainer" class="hidden bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="p-5 md:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <h3 class="text-lg font-black text-slate-800">Kemaskini Jawatan Ahli</h3>
+            <button onclick="simpanSemuaJawatan()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-2.5 rounded-2xl text-xs shadow-lg shadow-emerald-600/10">
+              <i class="fa-solid fa-floppy-disk mr-1.5"></i> Simpan Semua Jawatan
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 text-xs font-bold">
+                  <th class="p-4">Nama Murid</th>
+                  <th class="p-4">Kelas</th>
+                  <th class="p-4 w-64">Jawatan Dalam Unit</th>
+                </tr>
+              </thead>
+              <tbody id="tblJawatanBody" class="divide-y divide-slate-100 text-slate-700 font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. PENGURUSAN KOKO (ADMIN SAHAJA) -->
+      <section id="sectionPengurusanKoko" class="section-view hidden space-y-6">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-lg font-black text-slate-800 mb-5 flex items-center"><i class="fa-solid fa-folder-open text-indigo-500 mr-2.5"></i>Daftar Unit Kokurikulum</h3>
+          <form id="formKokoBaru" onsubmit="handleSimpanKoko(event)" class="space-y-5">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kategori Unit</label>
+                <select id="kokoKategori" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="Unit Uniform">Unit Uniform</option>
+                  <option value="Kelab Persatuan">Kelab Persatuan</option>
+                  <option value="Sukan Permainan">Sukan Permainan</option>
+                  <option value="Rumah Sukan">Rumah Sukan</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Unit / Kelab</label>
+                <input type="text" id="kokoNama" placeholder="Contoh: Kadet Polis" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Guru Penasihat</label>
+                <div id="guruPenasihatChecklist" class="p-3 border border-slate-200 rounded-2xl h-28 overflow-y-auto space-y-1.5 bg-slate-50 text-xs font-semibold"></div>
+              </div>
+            </div>
+            <div class="flex justify-end"><button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl text-xs shadow-lg shadow-indigo-600/10">Daftar Unit Koko</button></div>
+          </form>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <h3 class="text-base font-black text-slate-800 mb-5">Master Rekod Unit Kokurikulum</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 font-bold text-xs">
+                  <th class="p-4">Kategori</th>
+                  <th class="p-4">Nama Unit</th>
+                  <th class="p-4">Guru Penasihat</th>
+                  <th class="p-4 text-center">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="tblPengurusanKoko" class="divide-y divide-slate-100 text-slate-700 font-semibold"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. PENCAPAIAN (PAGINATION + STATS + LIVE IC) -->
+      <section id="sectionPencapaian" class="section-view hidden space-y-6">
+        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between">
+          <div class="flex flex-wrap gap-2.5 w-full lg:w-auto items-center">
+            <input type="text" id="cariPencapaianKeyword" oninput="resetPencapaianPage()" placeholder="Cari nama program..." 
+              class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-48">
+            <select id="filterBulan" onchange="resetPencapaianPage()" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-32">
+              <option value="">Semua Bulan</option>
+              <option value="01">Januari</option><option value="02">Februari</option><option value="03">Mac</option><option value="04">April</option>
+              <option value="05">Mei</option><option value="06">Jun</option><option value="07">Julai</option><option value="08">Ogos</option>
+              <option value="09">September</option><option value="10">Oktober</option><option value="11">November</option><option value="12">Disember</option>
+            </select>
+            <select id="cariPencapaianPeringkat" onchange="resetPencapaianPage()" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-36">
+              <option value="">Semua Peringkat</option>
+              <option value="Sekolah">Sekolah</option><option value="Daerah">Daerah</option><option value="Negeri">Negeri</option><option value="Kebangsaan">Kebangsaan</option><option value="Antarabangsa">Antarabangsa</option>
+            </select>
+            <select id="filterKategoriPencapaian" onchange="resetPencapaianPage()" class="px-3 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-44">
+              <option value="">Semua Kategori</option>
+              <option value="Unit Beruniform">Unit Beruniform</option><option value="Kelab Persatuan">Kelab Persatuan</option><option value="Sukan Permainan">Sukan Permainan</option>
+              <option value="KOAD-BM">KOAD-BM</option><option value="KOAD-BI">KOAD-BI</option><option value="KOAD-STEM">KOAD-STEM</option><option value="KESENIAN">KESENIAN</option><option value="KOADADEMIK">KOADADEMIK</option>
+              <option value="Ekstra kurikulum">Ekstra kurikulum</option>
+            </select>
+            <input type="text" id="cariGuruPP" oninput="resetPencapaianPage()" placeholder="Nama Guru" 
+              class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-30">
+          </div>
+          <button id="btnTambahPencapaian" onclick="bukaModalPencapaian()" class="hidden w-full lg:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/10">
+            <i class="fa-solid fa-plus mr-2"></i> Isi Pencapaian
+          </button>
+        </div>
+
+        <div id="notaMuridPencapaian" class="hidden bg-amber-50 border-l-4 border-amber-500 p-4 rounded-2xl">
+          <p class="text-xs text-amber-800 font-bold uppercase tracking-wider"><i class="fa-solid fa-circle-info mr-2"></i>Sila hantar sijil fizikal/digital luar sekolah kepada guru pembimbing anda.</p>
+        </div>
+
+        <!-- Jadual Pencapaian (Pagination, Statistik Kaum, Dokumen) -->
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 text-xs font-bold">
+                  <th class="p-4">Program & Penganjur</th>
+                  <th class="p-4">Peringkat & Kemenangan</th>
+                  <th class="p-4">Ahli Terlibat</th>
+                  <th class="p-4">Guru Pembimbing & Pengiring</th>
+                  <th class="p-4">Statistik Kaum (Bangsa)</th>
+                  <th class="p-4 text-center">Dokumen</th>
+                  <th class="p-4 text-center actions-col">Tindakan</th>
+                </tr>
+              </thead>
+              <tbody id="tblPencapaianBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+            </table>
+          </div>
+          <div class="flex items-center justify-between p-4 border-t bg-slate-50">
+            <div id="pencapaianPageInfo" class="text-xs text-slate-500 font-medium">
+              Muka surat 1 daripada 1 (0 Rekod)
+            </div>
+            
+            <div class="flex space-x-2">
+              <button id="btnPrevPencapaian" onclick="pencapaianHalamanSebelumnya()" class="px-3 py-1 bg-white text-slate-700 border hover:bg-slate-50 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                Sebelumnya
+              </button>
+              <button id="btnNextPencapaian" onclick="pencapaianHalamanSeterusnya()" class="px-3 py-1 bg-white text-slate-700 border hover:bg-slate-50 rounded text-xs font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                Seterusnya
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. SEKSYEN RUMUSAN PAJSK -->
+      <section id="sectionPAJSK" class="section-view hidden py-20 text-center">
+        <div class="max-w-md mx-auto space-y-5">
+          <div class="w-20 h-24 bg-slate-100 rounded-3xl flex items-center justify-center text-slate-300 text-5xl mx-auto"><i class="fa-solid fa-circle-notch animate-spin"></i></div>
+          <h3 class="text-2xl font-black text-slate-900 tracking-tight">Bahagian Akan Dikemaskini</h3>
+          <p class="text-sm text-slate-500 leading-relaxed font-medium">Sistem rumusan markah kokurikulum dan PAJSK akan ditambah baik pada fasa seterusnya untuk sokongan pautan spreadsheet penuh.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ======================== MODALS & POPUPS ======================== -->
+  
+  <!-- MODAL PROFILE -->
+  <div id="modalProfil" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden">
+      <div class="bg-slate-900 p-5 flex justify-between items-center text-white">
+        <h3 class="font-extrabold text-xs uppercase tracking-widest">Kemas kini Profil</h3>
+        <button onclick="closeProfileModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="formProfil" onsubmit="handleUpdateProfil(event)" class="p-6 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Gambar Profil</label>
+          <input type="file" id="picInput" accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-blue-50 file:text-blue-700">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kata Laluan Baharu</label>
+          <input type="password" id="profPass" placeholder="Biarkan kosong jika tiada perubahan" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Sahkan Kata Laluan</label>
+          <input type="password" id="profPassConfirm" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="flex gap-2 pt-4">
+          <button type="button" onclick="closeProfileModal()" class="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest">Batal</button>
+          <button type="submit" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/15">Simpan</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL MURID -->
+  <div id="modalMurid" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-3xl overflow-hidden">
+      <div class="bg-slate-900 p-5 flex justify-between items-center text-white">
+        <h3 id="modalMuridTitle" class="font-extrabold text-xs uppercase tracking-widest">Pendaftaran Murid</h3>
+        <button onclick="closeModalMurid()"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="formMurid" onsubmit="handleSimpanMurid(event)" class="p-6 md:p-8 max-h-[80vh] overflow-y-auto space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Penuh Murid</label><input type="text" id="mNama" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></div>
+            <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nombor IC (Tanpa '-')</label><input type="text" id="mIc" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kelas</label>
+                <select id="mKelas" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="4 SEROJA">4 SEROJA</option><option value="4 TULIP">4 TULIP</option><option value="4 MAWAR">4 MAWAR</option><option value="4 ANGGERIK">4 ANGGERIK</option><option value="4 RAYA">4 RAYA</option>
+                  <option value="5 SEROJA">5 SEROJA</option><option value="5 TULIP">5 TULIP</option><option value="5 MAWAR">5 MAWAR</option><option value="5 ANGGERIK">5 ANGGERIK</option><option value="5 RAYA">5 RAYA</option>
+                  <option value="6 SEROJA">6 SEROJA</option><option value="6 TULIP">6 TULIP</option><option value="6 MAWAR">6 MAWAR</option><option value="6 ANGGERIK">6 ANGGERIK</option><option value="6 RAYA">6 RAYA</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Bangsa</label>
+                <select id="mKaum" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="MELAYU">MELAYU</option><option value="CINA">CINA</option><option value="INDIA">INDIA</option>
+                  <option value="ARAB">ARAB</option><option value="BANGLADESHI">BANGLADESHI</option><option value="BIDAYUH">BIDAYUH</option>
+                  <option value="DUSUN">DUSUN</option><option value="EURASIAN">EURASIAN</option><option value="FILIPINO">FILIPINO</option>
+                  <option value="INDIA MUSLIM">INDIA MUSLIM</option><option value="PUNJABI">PUNJABI</option><option value="SIKH">SIKH</option><option value="TELEGU">TELEGU</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Agama</label>
+                <select id="mAgama" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="ISLAM">ISLAM</option><option value="BUDDHA">BUDDHA</option><option value="HINDU">HINDU</option><option value="KRISTIAN">KRISTIAN</option><option value="SIKHISM">SIKHISM</option>
+                </select>
+              </div>
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tel Penjaga 1</label><input type="text" id="mTel1" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></div>
+            </div>
+            <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tel Penjaga 2 (Jika Ada)</label><input type="text" id="mTel2" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></div>
+          </div>
+
+          <div class="bg-slate-50 p-5 rounded-3xl border border-slate-200/60 space-y-4 flex flex-col justify-center">
+            <h4 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider border-b pb-2 mb-2">Pemilihan Unit Kokurikulum</h4>
+            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Unit Uniform</label><select id="mSelUniform" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></select></div>
+            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Kelab & Persatuan</label><select id="mSelKelab" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></select></div>
+            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sukan & Permainan</label><select id="mSelSukan" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></select></div>
+            <div><label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rumah Sukan</label><select id="mSelRumah" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></select></div>
+          </div>
+        </div>
+        <div class="flex justify-end space-x-2 pt-5 border-t border-slate-100">
+          <button type="button" onclick="closeModalMurid()" class="px-5 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest">Batal</button>
+          <button type="submit" class="px-5 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/15">Simpan Data Murid</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL PERJUMPAAN -->
+  <div id="modalPerjumpaan" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
+    <div class="bg-white rounded-3xl w-full max-w-2xl p-6 shadow-2xl overflow-hidden">
+      <h2 id="modalPerjumpaanTitle" class="text-xl font-bold text-slate-800 mb-4">Isi Laporan Perjumpaan</h2>
+      
+    <form id="formPerjumpaan">
+      <input type="hidden" id="prmId" name="prmId">
+      
+      <div class="space-y-4">
+        
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Unit Koko</label>
+            <select id="prmUnitKoko" name="prmUnitKoko" required class="w-full p-3 border rounded-xl"></select>
+          </div>
+            
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Bilangan Perjumpaan</label>
+            <input type="prmBil" id="prmBil" min="1" max="12" required placeholder="1 - 12" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1">Tarikh</label>
+          <input type="date" id="prmTarikh" name="prmTarikh" required class="w-full p-3 border rounded-xl">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1">Tajuk</label>
+          <input type="text" id="prmTajuk" name="prmTajuk" required class="w-full p-3 border rounded-xl">
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1">Keterangan</label>
+          <textarea id="prmKeterangan" name="prmKeterangan" class="w-full p-3 border rounded-xl"></textarea>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 1</label>
+            <input type="file" id="prmFile1" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+            <input type="hidden" id="prmImg1" name="prmImg1">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 2</label>
+            <input type="file" id="prmFile2" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+            <input type="hidden" id="prmImg2" name="prmImg2">
+          </div>
+          
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 3</label>
+            <input type="file" id="prmFile3" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+            <input type="hidden" id="prmImg3" name="prmImg3">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guru Pembimbing (Boleh Tick)</label>
+          <div id="prmGuruChecklist" class="p-3 border border-slate-200 rounded-2xl h-24 overflow-y-auto space-y-1.5 bg-slate-50 text-[12px] font-bold"></div>
+        </div>
+            
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Catatan</label>
+            <textarea id="prmCatatan" name="prmCatatan" class="w-full p-3 border rounded-xl"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 mt-6">
+        <button type="button" onclick="document.getElementById('modalPerjumpaan').classList.add('hidden')" class="px-4 py-2 text-slate-600 font-bold">Batal</button>
+        <button type="button" onclick="simpanDataPerjumpaan()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">Simpan</button>
+      </div>
+    </form>
+      
+    </div>
+  </div>
+
+  <!-- MODAL PENCAPAIAN -->
+  <div id="modalPencapaian" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-xl w-full max-w-4xl overflow-hidden">
+      <div class="bg-slate-900 p-5 flex justify-between items-center text-white">
+        <h3 id="modalPencapaianTitle" class="font-extrabold text-xs uppercase tracking-widest">Rekod Pencapaian & Program</h3>
+        <button onclick="closeModalPencapaian()"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <form id="formPencapaian" onsubmit="handleSimpanPencapaian(event)" class="p-6 md:p-8 max-h-[85vh] overflow-y-auto space-y-6">
+        <input type="hidden" id="pId">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-4">
+            <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Nama Program / Pertandingan</label><input type="text" id="pNamaProg" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></div>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tarikh Pertandingan</label><input type="date" id="pTarikh" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none"></div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Peringkat</label>
+                <select id="pPeringkat" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="Sekolah">Sekolah</option><option value="Daerah">Daerah</option><option value="Negeri">Negeri</option><option value="Kebangsaan">Kebangsaan</option><option value="Antarabangsa">Antarabangsa</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Anjuran / Penyelaras</label><input type="text" id="pPenganjur" required placeholder="Cth: Kelab Catur" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none"></div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Badan Penganjur</label>
+                <select id="pBadanPenganjur" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="KPM">KPM</option><option value="JPWPKL">JPWPKL</option><option value="PPD">PPD</option><option value="Agensi Luar">Agensi Luar</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tempat Program</label><input type="text" id="pTempat" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none"></div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kemenangan / Kedudukan</label>
+                <select id="pKedudukan" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="Johan">Johan</option><option value="Naib Johan">Naib Johan</option><option value="Ketiga">Ketiga</option><option value="Keempat">Keempat</option><option value="Kelima">Kelima</option><option value="Penyertaan">Penyertaan</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kategori Utama</label>
+                <select id="pKategori" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+                  <option value="Unit Beruniform">Unit Beruniform</option><option value="Kelab Persatuan">Kelab Persatuan</option><option value="Sukan Permainan">Sukan Permainan</option>
+                  <option value="KOAD-BM">KOAD-BM</option><option value="KOAD-BI">KOAD-BI</option><option value="KOAD-STEM">KOAD-STEM</option><option value="KESENIAN">KESENIAN</option><option value="KOADADEMIK">KOADADEMIK</option>
+                  <option value="Ekstra kurikulum">Ekstra kurikulum</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Catatan Keputusan</label>
+                <textarea id="pCatatanKeputusan" placeholder="Contoh: Johan / Naib Johan / Saguhati / 85 Markah" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500 h-[46px] resize-none"></textarea>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="space-y-4">
+            <!-- Box Input Ahli Pukal + Live IC Response -->
+            <div class="bg-indigo-50 p-4 rounded-3xl border border-indigo-100/80">
+              <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1.5">No. IC Ahli Terlibat (Pukal: Pisahkan dengan koma ",")</label>
+              <textarea id="pPesertaList" oninput="updateLiveICPreview()" required rows="2" placeholder="Contoh: 100303037777, 100404048888" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+              <div id="icPreviewContainer" class="mt-2 text-[11px] text-indigo-900 font-bold leading-normal italic bg-white/60 p-2.5 rounded-xl border border-indigo-100/40">Sila masukkan No. IC untuk melihat pra-tonton nama.</div>
+            </div>
+
+            <!-- Guru Pembimbing & Guru Pengiring -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guru Pembimbing (Boleh Tick)</label>
+                <div id="pilihGuruPembimbingList" class="p-3 border border-slate-200 rounded-2xl h-24 overflow-y-auto space-y-1.5 bg-slate-50 text-[10px] font-bold"></div>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guru Pengiring (Boleh Tick)</label>
+                <div id="pilihGuruPengiringList" class="p-3 border border-slate-200 rounded-2xl h-24 overflow-y-auto space-y-1.5 bg-slate-50 text-[10px] font-bold"></div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link Gambar Bukti</label><input type="url" id="pLinkGambar" placeholder="Link Google Drive / URL Imej" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"></div>
+              <div><label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Link Sijil (Google Drive)</label><input type="url" id="pLinkSijil" placeholder="Link Drive Terbuka Public" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-2 pt-5 border-t border-slate-100">
+          <button type="button" onclick="closeModalPencapaian()" class="px-5 py-3 border border-slate-200 rounded-xl text-xs font-bold text-slate-400 uppercase tracking-widest">Batal</button>
+          <button type="submit" class="px-5 py-3 bg-indigo-600 text-white rounded-xl text-xs font-bold uppercase tracking-widest shadow-lg shadow-indigo-600/15">Simpan Rekod</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- NOTIFIKASI TOAST -->
+  <div id="toastNotification" class="hidden fixed bottom-5 right-5 bg-slate-900 text-white px-6 py-4 rounded-3xl shadow-2xl flex items-center space-x-3 z-50 transition duration-300 transform translate-y-10">
+    <span id="toastIcon" class="text-xl"></span>
+    <p id="toastMessage" class="text-xs font-bold uppercase tracking-wider"></p>
+  </div>
+
+  <!-- ======================== SISTEM LOGIK JAVASCRIPT ======================== -->
+  <script>
+    // Letakkan di bahagian atas skrip HTML (Global Variables)
+    let dataPencapaianSemasa = []; // Menyimpan semua data dari server
+    let halamanPencapaianSemasa = 1; // Halaman aktif
+    const rekodSetiapHalaman = 10; // Tetapan 10 senarai setiap muka surat
+    
+    function bersihkanIC(ic) {
+      if (!ic) return "";
+      let str = ic.toString().trim().replace(/[^a-zA-Z0-9]/g, "");
+      if (/^\d{11}$/.test(str)) {
+        str = "0" + str;
+      }
+      return str;
+    }
+
+    // STATE PENGURUSAN PORTAL
+    let userActive = null; 
+    let allMurids = [];
+    let allKokoUnits = [];
+    let allPencapaian = [];
+    let allAktivitiKoko = []; // Memulakan pembolehubah laporan perjumpaan kokurikulum secara global
+    let chartsObj = {};
+    
+    // State Kehadiran & Jawatan
+    let rawKehadiranData = [];
+    let senaraiAhliFiltered = [];
+    
+    // Isu Search-driven (Maklumat Murid kosong secara lalai)
+    let hasSearchedMurid = false;
+
+    // State Pagination Pencapaian
+    let pencapaianPage = 1;
+    const itemSatuMuka = 10;
+
+    // PEMULA SISTEM - KEKALKAN SESI LOG MASUK (PERSISTENT SESSION)
+    const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
+    function handleResponse(data) {
+      document.getElementById("output").innerText =
+        data.message || "No message";
+    }
+    function loadData() {
+      const script = document.createElement("script");
+      script.src = API_URL + "?callback=handleResponse";
+      script.onerror = function () {
+        document.getElementById("output").innerText =
+          "Failed to load API";
+      };
+      document.body.appendChild(script);
+    }
+    window.onload = function() {
+      var dataSesi = sessionStorage.getItem('userActive');
+      
+      // HAD KESELAMATAN: Jika tiada sesi aktif, paksa sistem kekal di login page dan JANGAN teruskan kod portal
+      if (!dataSesi) {
+        document.getElementById('loginPage').classList.remove('hidden');
+        document.getElementById('appPortal').classList.add('hidden');
+        
+        // Hilangkan kelipan permulaan pada loginPage
+        const loginPage = document.getElementById('loginPage');
+        loginPage.classList.remove('animasi-awal');
+        const loginCard = loginPage.querySelector('.bg-white\\/95');
+        if(loginCard) loginCard.classList.remove('animasi-awal');
+        return; // <--- SEKAT DI SINI supaya skrip bawah tidak berjalan dan tidak 'crash' putih
+      } else {
+        userActive = JSON.parse(dataSesi);
+        paparPortalUtama();
+      }
+    };
+
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const msg = document.getElementById('toastMessage');
+      const icon = document.getElementById('toastIcon');
+      
+      if (msg) msg.textContent = message;
+      if (icon) {
+        icon.innerHTML = isError 
+          ? '<i class="fa-solid fa-triangle-exclamation text-rose-500"></i>' 
+          : '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+      }
+      
+      if (toast) {
+        toast.classList.remove('hidden', 'translate-y-10');
+        toast.classList.add('flex', 'translate-y-0');
+        
+        setTimeout(() => {
+          toast.classList.add('hidden', 'translate-y-10');
+          toast.classList.remove('flex', 'translate-y-0');
+        }, 5000);
+      }
+    }
+
+    function togglePasswordVisibility(fieldId) {
+      const input = document.getElementById(fieldId);
+      const icon = document.getElementById('eye-icon-' + fieldId);
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+      } else {
+        input.type = "password";
+        icon.classList.add('fa-eye');
+        icon.classList.remove('fa-eye-slash');
+      }
+    }
+
+    function toggleLoader(show) {
+      const loader = document.getElementById('loader');
+      if (show) loader.classList.remove('hidden');
+      else loader.classList.add('hidden');
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const sidebarGroup = document.getElementById('sidebarGroup');
+      const txts = document.querySelectorAll('.sidebar-text');
+
+      // Periksa sama ada sidebar sedang mengecil (collapsed) atau tidak
+      if (sidebar.classList.contains('md:w-64')) {
+        // 1. KECILKAN SIDEBAR (Hanya ikon kelihatan)
+        sidebar.classList.remove('md:w-64');
+        sidebar.classList.add('md:w-20'); // Ditukar ke lebar saiz bar ikon yang kecil
+        
+        if (sidebarGroup) {
+          sidebarGroup.classList.remove('md:w-64');
+          sidebarGroup.classList.add('md:w-20');
+        }
+
+        // Sembunyikan semua elemen teks
+        txts.forEach(t => t.classList.add('hidden'));
+      } else {
+        // 2. BESARKAN SEMULA SIDEBAR
+        sidebar.classList.remove('md:w-20');
+        sidebar.classList.add('md:w-64');
+        
+        if (sidebarGroup) {
+          sidebarGroup.classList.remove('md:w-20');
+          sidebarGroup.classList.add('md:w-64');
+        }
+
+        // Paparkan semula semua elemen teks
+        txts.forEach(t => t.classList.remove('hidden'));
+      }
+    }
+
+    // Fungsi untuk membuka dan menutup menu atas pada paparan smartphone
+    function toggleMobileMenu() {
+      const menuContent = document.getElementById('menuContent');
+      const menuIcon = document.getElementById('mobileMenuIcon');
+      
+      if (menuContent.classList.contains('hidden')) {
+        menuContent.classList.remove('hidden');
+        // Tukar ikon kepada tanda pangkah (X) apabila menu dibuka
+        menuIcon.classList.remove('fa-bars');
+        menuIcon.classList.add('fa-xmark');
+      } else {
+        menuContent.classList.add('hidden');
+        // Tukar semula kepada ikon bar三 apabila menu ditutup
+        menuIcon.classList.remove('fa-xmark');
+        menuIcon.classList.add('fa-bars');
+      }
+    }
+
+    // Fungsi pembantu untuk menutup semula menu dropdown secara automatik selepas user memilih seksyen
+    function tutupMenuMobileSelepasKlik() {
+      // Hanya jalankan fungsi ini jika skrip dikesan dibuka pada paparan skrin mudah alih (bawah takat md:768px)
+      if (window.innerWidth < 768) {
+        const menuContent = document.getElementById('menuContent');
+        const menuIcon = document.getElementById('mobileMenuIcon');
+        
+        menuContent.classList.add('hidden');
+        menuIcon.classList.remove('fa-xmark');
+        menuIcon.classList.add('fa-bars');
+      }
+    }
+
+    // LOG MASUK BERJAYA DENGAN PENYIMPANAN SESI
+    function handleLogin(e) {
+      e.preventDefault();
+      const ic = document.getElementById('loginIc').value.trim();
+      const pass = document.getElementById('loginPass').value.trim();
+      const alertBox = document.getElementById('loginAlert');
+      const btn = document.getElementById('btnLogin');
+
+      alertBox.classList.add('hidden');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Sila tunggu...';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          btn.disabled = false;
+          btn.innerHTML = 'MASUK PORTAL <i class="fa-solid fa-right-to-bracket ml-1.5"></i>';
+          
+          if(res.success) {
+            userActive = res;
+            // Simpan sesi ke sessionStorage
+            sessionStorage.setItem('userActive', JSON.stringify(res));
+            paparPortalUtama();
+          } else {
+            alertBox.textContent = res.message;
+            alertBox.classList.remove('hidden');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerHTML = 'MASUK PORTAL';
+          alertBox.textContent = "Gagal menghubungi pelayan Google Sheets: " + err.message;
+          alertBox.classList.remove('hidden');
+        })
+        .loginUser(ic, pass);
+    }
+
+    function paparPortalUtama() {
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('appPortal').classList.remove('hidden');
+      document.getElementById('sideName').textContent = userActive.nama;
+      document.getElementById('sideRole').textContent = userActive.peranan;
+      if(userActive.gambar) {
+        document.getElementById('sidePic').src = userActive.gambar;
+      } else {
+        document.getElementById('sidePic').src = 'https://placehold.co/100x100?text=' + userActive.nama.substring(0, 2).toUpperCase();
+      }
+
+      configureAccessControl();
+      muatSemuaDataMula();
+    }
+
+    // LOG KELUAR SISTEM DENGAN PEMBERSIHAN SESI & CATATAN LOG
+    function handleLogout() {
+      if (typeof toggleLoader === 'function') toggleLoader(true);
+
+      google.script.run
+        .withSuccessHandler(function() {
+          prosesLogKeluarBersih();
+        })
+        .withFailureHandler(function() {
+          prosesLogKeluarBersih();
+        })
+        .logKeluarSistem(userActive ? userActive.ic : '', userActive ? userActive.nama : '');
+    }
+
+    function prosesLogKeluarBersih() {
+      if (typeof toggleLoader === 'function') toggleLoader(false);
+      sessionStorage.removeItem('userActive');
+      userActive = null; 
+      document.getElementById('appPortal').classList.add('hidden');
+      document.getElementById('loginPage').classList.remove('hidden');
+      document.getElementById('loginIc').value = '';
+      document.getElementById('loginPass').value = '';
+    }
+
+    function configureAccessControl() {
+      const role = userActive.peranan;
+      
+      document.getElementById('menuDataPengguna').classList.add('hidden');
+      document.getElementById('menuKehadiran').classList.add('hidden');
+      document.getElementById('menuPerjumpaan').classList.add('hidden');
+      document.getElementById('menuJawatan').classList.add('hidden');
+      document.getElementById('menuAdminKehadiran').classList.add('hidden');
+      document.getElementById('menuPengurusanKoko').classList.add('hidden');
+      
+      document.getElementById('btnTambahMurid').classList.add('hidden');
+      document.getElementById('tableMuridContainer').classList.add('hidden');
+      document.getElementById('detailMuridSendiri').classList.add('hidden');
+      document.getElementById('carianMuridControl').classList.add('hidden');
+
+      document.getElementById('btnTambahPencapaian').classList.add('hidden');
+      document.getElementById('notaMuridPencapaian').classList.add('hidden');
+      
+      if(role === "Admin") {
+        document.getElementById('menuDataPengguna').classList.remove('hidden');
+        document.getElementById('menuPengurusanKoko').classList.remove('hidden');
+        document.getElementById('menuAdminKehadiran').classList.remove('hidden');
+        document.getElementById('menuPerjumpaan').classList.remove('hidden');
+        
+        document.getElementById('btnTambahMurid').classList.remove('hidden');
+        document.getElementById('tableMuridContainer').classList.remove('hidden');
+        document.getElementById('carianMuridControl').classList.remove('hidden');
+        
+        document.getElementById('btnTambahPencapaian').classList.remove('hidden');
+        document.getElementById('adminStatsGrid').classList.remove('hidden');
+        document.getElementById('adminChartsGrid').classList.remove('hidden');
+      } 
+      else if(role === "Guru") {
+        document.getElementById('menuDataPengguna').classList.remove('hidden');
+        document.getElementById('menuKehadiran').classList.remove('hidden');
+        document.getElementById('menuPerjumpaan').classList.remove('hidden');
+        document.getElementById('menuJawatan').classList.remove('hidden'); 
+        
+        document.getElementById('tableMuridContainer').classList.remove('hidden');
+        document.getElementById('carianMuridControl').classList.remove('hidden');
+        
+        document.getElementById('btnTambahPencapaian').classList.remove('hidden');
+        document.getElementById('adminStatsGrid').classList.add('hidden');
+        document.getElementById('adminChartsGrid').classList.add('hidden');
+      } 
+      else if(role === "Murid") {
+        document.getElementById('menuKehadiran').classList.remove('hidden');
+        
+        document.getElementById('detailMuridSendiri').classList.remove('hidden');
+        document.getElementById('notaMuridPencapaian').classList.remove('hidden');
+        
+        document.getElementById('adminStatsGrid').classList.add('hidden');
+        document.getElementById('adminChartsGrid').classList.add('hidden');
+      }
+
+      showSection('sectionDashboard');
+    }
+
+    // PROFILE MODAL
+    function openProfileModal() {
+      document.getElementById('modalProfil').classList.remove('hidden');
+    }
+    function closeProfileModal() {
+      document.getElementById('modalProfil').classList.add('hidden');
+      document.getElementById('formProfil').reset();
+    }
+
+    // SEKSYEN NAVIGATION CONTROLLER
+    function showSection(sectionId) {
+      if(!sectionId) return;
+      
+      const views = document.querySelectorAll('.section-view');
+      views.forEach(v => v.classList.remove('active'));
+
+      document.getElementById(sectionId).classList.add('active');
+
+      const headerTitle = document.getElementById('headerTitle');
+      const headerSub = document.getElementById('headerSub');
+
+      if(sectionId === 'sectionDashboard') {
+        headerTitle.textContent = "Dashboard Utama";
+        headerSub.textContent = "Paparan statistik & data rekod kokurikulum murid.";
+        refreshDashboardView();
+      } else if(sectionId === 'sectionMaklumat') {
+        headerTitle.textContent = "Pengurusan Maklumat Murid";
+        headerSub.textContent = "Daftar, semak, edit profil data kokurikulum keluarga murid.";
+        paparMaklumatMuridSection();
+      } else if(sectionId === 'sectionAdminKehadiran') {
+        headerTitle.textContent = "Statistik Kehadiran Kokurikulum (Admin)";
+        headerSub.textContent = "Matriks peratus kehadiran murid mengikut unit pilihan.";
+        paparAdminKehadiran();
+      } else if(sectionId === 'sectionPengguna') {
+        headerTitle.textContent = "Pengurusan Pengguna Portal & Guru";
+        headerSub.textContent = "Senarai guru, pentadbir, serta akses kendalian aktiviti kokurikulum sekolah.";
+        paparDataPenggunaSection();
+      } else if(sectionId === 'sectionKehadiran') {
+        headerTitle.textContent = "Kehadiran Ahli";
+        headerSub.textContent = "Penandaan satu kehadiran mingguan ahli dalam unit berkaitan.";
+        paparKehadiranSection();
+      } else if(sectionId === 'sectionPerjumpaan') {
+        headerTitle.textContent = "Laporan Perjumpaan Kokurikulum";
+        headerSub.textContent = "Isi, kemaskini, dan semak rekod aktiviti serta catatan perjumpaan mingguan.";
+        paparPerjumpaanSection();
+      } else if(sectionId === 'sectionJawatan') {
+        headerTitle.textContent = "Urusan Jawatan Ahli";
+        headerSub.textContent = "Pilih, ubah, dan tetapkan jawatan bagi ahli-ahli kelab kendalian.";
+        paparJawatanSection();
+      } else if(sectionId === 'sectionPengurusanKoko') {
+        headerTitle.textContent = "Sistem Urus Kokurikulum Sekolah";
+        headerSub.textContent = "Daftar unit uniform, kelab, sukan permainan, rumah sukan dan guru penasihat.";
+        paparPengurusanKokoSection();
+      } else if(sectionId === 'sectionPencapaian') {
+        headerTitle.textContent = "Pencapaian & Kejayaan Murid";
+        headerSub.textContent = "Perekodan penglibatan, kemenangan murid mengikut 10 rekod setiap halaman.";
+        paparPencapaianSection();
+      } else if(sectionId === 'sectionPAJSK') {
+        headerTitle.textContent = "Sistem Rumusan Markah PAJSK";
+        headerSub.textContent = "Cetak sijil & Rumusan Data Penglibatan Kokurikulum.";
+      }
+    }
+
+    // ASYNC DATA LOADING - DENGAN PENGENDALI RALAT BEBAS SILENT CRASH
+    function muatSemuaDataMula() {
+      const loaderStatus = document.getElementById('loaderStatus');
+      if (loaderStatus) loaderStatus.classList.remove('hidden');
+      
+      google.script.run
+        .withSuccessHandler(function(units) {
+          allKokoUnits = units || [];
+          updateDropdownsKokoMurid();
+
+          google.script.run
+            .withSuccessHandler(function(murids) {
+              allMurids = murids || [];
+              
+              google.script.run
+                .withSuccessHandler(function(pencapaian) {
+                  allPencapaian = pencapaian || [];
+                  
+                  google.script.run
+                    .withSuccessHandler(function(khdData) {
+                      rawKehadiranData = khdData || [];
+                      
+                      google.script.run
+                        .withSuccessHandler(function(aktivitiData) {
+                          allAktivitiKoko = aktivitiData || [];
+                          if (loaderStatus) loaderStatus.classList.add('hidden');
+                          refreshDashboardView();
+                        })
+                        .withFailureHandler(function(err) {
+                          if (loaderStatus) loaderStatus.classList.add('hidden');
+                          showToast("Gagal memuatkan data Laporan Aktiviti: " + err.message, true);
+                        })
+                        .getAktivitiKoko(null);
+                    })
+                    .withFailureHandler(function(err) {
+                      if (loaderStatus) loaderStatus.classList.add('hidden');
+                      showToast("Gagal memuatkan data Kehadiran: " + err.message, true);
+                    })
+                    .getSemuaKehadiranAdmin();
+                })
+                .withFailureHandler(function(err) {
+                  if (loaderStatus) loaderStatus.classList.add('hidden');
+                  showToast("Gagal memuatkan data Pencapaian: " + err.message, true);
+                })
+                .getPencapaian();
+            })
+            .withFailureHandler(function(err) {
+              if (loaderStatus) loaderStatus.classList.add('hidden');
+              showToast("Gagal memuatkan data Murid: " + err.message, true);
+            })
+            .getMaklumatMurid(userActive.ic, 'Admin');
+        })
+        .withFailureHandler(function(err) {
+          if (loaderStatus) loaderStatus.classList.add('hidden');
+          showToast("Gagal memuatkan data Pengurusan Koko: " + err.message, true);
+        })
+        .getPengurusanKoko();
+    }
+
+    // FUNGSI UNTUK DAPATKAN NISBAH KEHADIRAN (HADIR / VALID LAPORAN)
+    function dapatkanNisbahKehadiran(studentIc, unitName) {
+      if (!unitName || unitName === "-" || unitName.trim() === "") return "-";
+      
+      // Senarai perjumpaan yang SAH dilaporkan oleh guru untuk unit ini
+      let reportedMeetings = allAktivitiKoko.filter(a => a.Nama_Unit === unitName && a.Tarikh && a.Tajuk);
+      let validMeetingNos = reportedMeetings.map(a => parseInt(a.Bil)); // Contoh: [1, 2, 4]
+      let totalReported = validMeetingNos.length;
+      
+      // Ambil rekod kehadiran murid bagi unit ini
+      let khd = rawKehadiranData.find(k => bersihkanIC(k.No_IC) === bersihkanIC(studentIc) && k.Nama_Unit === unitName);
+      if (!khd) {
+        return `${unitName} (0 / ${totalReported})`;
+      }
+      
+      let hadirCount = 0;
+      validMeetingNos.forEach(bil => {
+        if (khd.H && khd.H[bil - 1] === "H") {
+          hadirCount++;
+        }
+      });
+      
+      return `${unitName} (${hadirCount} / ${totalReported})`;
+    }
+
+    // --- SEKSYEN 1: DASHBOARD (DENGAN PENAPISAN PRESTASI GURU/MURID) ---
+    function refreshDashboardView() {
+      const loaderStatus = document.getElementById('loaderStatus');
+      if (loaderStatus) loaderStatus.classList.remove('hidden');
+      
+      if (!userActive || !userActive.peranan) {
+        console.error("Gagal memuat dashboard: Data 'userActive' belum siap atau kosong.");
+        if (loaderStatus) loaderStatus.classList.add('hidden');
+        alert("Data pengguna gagal dimuat. Sila muat semula halaman.");
+        return;
+      }
+
+      google.script.run
+        .withSuccessHandler(function(dbData) {
+          if (loaderStatus) loaderStatus.classList.add('hidden');
+          if (dbData) {
+            if(userActive.peranan === "Admin") {
+              document.getElementById('statTotalMurid').textContent = dbData.jmlMurid || 0;
+              document.getElementById('statTotalGuru').textContent = dbData.jmlGuru || 0;
+              document.getElementById('statTotalPencapaian').textContent = (dbData.pencapaian && dbData.pencapaian.Keseluruhan) ? (dbData.pencapaian.Keseluruhan - dbData.pencapaian.Penyertaan) : 0;
+              document.getElementById('statTotalPenyertaan').textContent = (dbData.pencapaian && dbData.pencapaian.Penyertaan) ? dbData.pencapaian.Penyertaan : 0;
+              binaDashboardCharts(dbData);
+            }
+            binaJadualPeringkatStats();
+          }
+        })
+        .withFailureHandler(function(error) {
+          if (loaderStatus) loaderStatus.classList.add('hidden');
+          console.error("Ralat server pada getDashboardData:", error);
+          showToast("Gagal mengambil data dashboard: " + error.message, true);
+        })
+        .getDashboardData(userActive.peranan, userActive.nama, userActive.ic);
+    }
+
+    function binaDashboardCharts(dbData) {
+      if (!dbData) return;
+      Object.keys(chartsObj).forEach(key => {
+        if(chartsObj[key]) chartsObj[key].destroy();
+      });
+
+      const buildPie = (elementId, labels, data, palette) => {
+        const el = document.getElementById(elementId);
+        if (!el) return null;
+        const ctx = el.getContext('2d');
+        return new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: data,
+              backgroundColor: palette,
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 9, weight: 'bold' } } }
+            }
+          }
+        });
+      };
+
+      const basePalette = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6', '#f43f5e', '#a855f7'];
+
+      chartsObj['kaum'] = buildPie('chartKaum', Object.keys(dbData.kaum || {}), Object.values(dbData.kaum || {}), basePalette);
+      chartsObj['agama'] = buildPie('chartAgama', Object.keys(dbData.agama || {}), Object.values(dbData.agama || {}), basePalette.slice(2));
+      chartsObj['uniform'] = buildPie('chartUniform', Object.keys(dbData.uniform || {}), Object.values(dbData.uniform || {}), basePalette.slice(4));
+    }
+
+    function binaJadualPeringkatStats() {
+      const peringkat = ["Antarabangsa", "Kebangsaan", "Negeri", "Daerah", "Sekolah"];
+      const tBody = document.getElementById('tblRingkasanPeringkat');
+      if (!tBody) return;
+      tBody.innerHTML = '';
+
+      peringkat.forEach(p => {
+        let johan = 0, naib = 0, ketiga = 0, ke4ke5 = 0, penyertaan = 0;
+        
+        allPencapaian.forEach(item => {
+          if(item.Peringkat === p) {
+            var peserta = item.Ahli_Terlibat ? item.Ahli_Terlibat.toString().trim() : "";
+            var guruPembimbing = item.Guru_Pembimbing ? item.Guru_Pembimbing.toString().trim() : "";
+            var guruPengiring = item.Guru_Pengiring ? item.Guru_Pengiring.toString().trim() : "";
+            
+            var layakStats = false;
+            if (userActive.peranan === "Admin") {
+              layakStats = true;
+            } else if (userActive.peranan === "Guru") {
+              if (guruPembimbing.includes(userActive.nama) || guruPengiring.includes(userActive.nama)) {
+                layakStats = true;
+              }
+            } else if (userActive.peranan === "Murid") {
+              if (peserta.includes(userActive.ic)) {
+                layakStats = true;
+              }
+            }
+            
+            if (layakStats) {
+              if(item.Pencapaian === "Johan") johan++;
+              else if(item.Pencapaian === "Naib Johan") naib++;
+              else if(item.Pencapaian === "Ketiga") ketiga++;
+              else if(item.Pencapaian === "Keempat" || item.Pencapaian === "Kelima") ke4ke5++;
+              else if(item.Pencapaian === "Penyertaan") penyertaan++;
+            }
+          }
+        });
+
+        const row = `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="p-4 font-bold text-slate-800">${p}</td>
+            <td class="p-4 text-center text-yellow-600 font-extrabold">${johan}</td>
+            <td class="p-4 text-center text-slate-500 font-extrabold">${naib}</td>
+            <td class="p-4 text-center text-amber-700 font-extrabold">${ketiga}</td>
+            <td class="p-4 text-center text-slate-700">${ke4ke5}</td>
+            <td class="p-4 text-center text-indigo-600 font-extrabold">${penyertaan}</td>
+          </tr>
+        `;
+        tBody.innerHTML += row;
+      });
+    }
+
+    // --- SEKSYEN 2: MAKLUMAT MURID ---
+    function paparMaklumatMuridSection() {
+      if(userActive.peranan === "Murid") {
+        document.getElementById('detailMuridSendiri').classList.remove('hidden');
+        document.getElementById('tableMuridContainer').classList.add('hidden');
+        
+        const m = allMurids.find(x => bersihkanIC(x.No_IC) === bersihkanIC(userActive.ic));
+        if(m) {
+          document.getElementById('msNama').textContent = m.Nama_Penuh;
+          document.getElementById('msKelas').textContent = "Kelas: " + m.Kelas;
+          document.getElementById('msIc').textContent = m.No_IC;
+          document.getElementById('msKaumAgama').textContent = `${m.Kaum} / ${m.Agama}`;
+          document.getElementById('msTelefon').textContent = `${m.No_Tel_Penjaga_1} (Utama) ${m.No_Tel_Penjaga_2 ? ', ' + m.No_Tel_Penjaga_2 : ''}`;
+          
+          // Paparkan Nisbah Kehadiran murid secara dinamik
+          document.getElementById('msUniform').textContent = m.Unit_Uniform ? dapatkanNisbahKehadiran(m.No_IC, m.Unit_Uniform) : "Belum didaftarkan";
+          document.getElementById('msKelab').textContent = m.Kelab_Persatuan ? dapatkanNisbahKehadiran(m.No_IC, m.Kelab_Persatuan) : "Belum didaftarkan";
+          document.getElementById('msSukan').textContent = m.Sukan_Permainan ? dapatkanNisbahKehadiran(m.No_IC, m.Sukan_Permainan) : "Belum didaftarkan";
+          document.getElementById('msRumah').textContent = m.Rumah_Sukan ? dapatkanNisbahKehadiran(m.No_IC, m.Rumah_Sukan) : "Belum didaftarkan";
+        }
+      } else {
+        document.getElementById('tableMuridContainer').classList.remove('hidden');
+        if(!hasSearchedMurid) {
+          document.getElementById('tblMuridBody').innerHTML = `
+            <tr>
+              <td colspan="4" class="p-16 text-center text-slate-400">
+                <div class="text-4xl mb-3"><i class="fa-solid fa-address-book"></i></div>
+                <p class="font-extrabold text-sm uppercase tracking-wider">Halaman Carian Lalai Kosong</p>
+                <p class="text-xs text-slate-400 mt-1">Sila masukkan Nama / IC atau pilih Kelas, kemudian klik "Cari".</p>
+              </td>
+            </tr>
+          `;
+        } else {
+          filterMaklumatMurid();
+        }
+      }
+    }
+
+    function pencarianMaklumatMurid() {
+      const keyword = document.getElementById('cariMuridKeyword').value.trim();
+      const kelas = document.getElementById('cariMuridKelas').value;
+
+      if (keyword === "" && kelas === "") {
+        showToast("Sila pilih kelas atau isi nama untuk cari", true);
+        return;
+      }
+
+      hasSearchedMurid = true;
+      filterMaklumatMurid();
+    }
+
+    function filterMaklumatMurid() {
+      if (!hasSearchedMurid) return;
+      const keyword = document.getElementById('cariMuridKeyword').value.toLowerCase().trim();
+      const kelas = document.getElementById('cariMuridKelas').value;
+      const body = document.getElementById('tblMuridBody');
+      body.innerHTML = '';
+
+      let filtered = allMurids;
+
+      if(kelas) {
+        filtered = filtered.filter(m => m.Kelas === kelas);
+      }
+      if(keyword) {
+        filtered = filtered.filter(m => m.Nama_Penuh.toLowerCase().includes(keyword) || bersihkanIC(m.No_IC).includes(bersihkanIC(keyword)));
+      }
+
+      if(filtered.length === 0) {
+        body.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-slate-400 font-bold">Tiada rekod murid ditemui mengikut carian tersebut.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        // Mendapatkan Nisbah Kehadiran untuk setiap unit terdaftar murid yang dipapar
+        let uniformText = m.Unit_Uniform ? dapatkanNisbahKehadiran(m.No_IC, m.Unit_Uniform) : "-";
+        let kelabText = m.Kelab_Persatuan ? dapatkanNisbahKehadiran(m.No_IC, m.Kelab_Persatuan) : "-";
+        let sukanText = m.Sukan_Permainan ? dapatkanNisbahKehadiran(m.No_IC, m.Sukan_Permainan) : "-";
+        let rumahText = m.Rumah_Sukan ? dapatkanNisbahKehadiran(m.No_IC, m.Rumah_Sukan) : "-";
+
+        const row = `
+          <tr class="hover:bg-slate-50 transition border-b">
+            <td class="p-4">
+              <div class="font-bold text-slate-800 text-sm">${m.Nama_Penuh}</div>
+              <!-- NOMBOR IC DIPELIHARA DAN DIPERBESARKAN DENGAN SAH -->
+              <div class="text-sm font-extrabold text-indigo-600 mt-1 uppercase tracking-wider">IC: ${m.No_IC}</div>
+              <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kelas: ${m.Kelas}</div>
+            </td>
+            <td class="p-4 text-xs font-semibold text-slate-500 space-y-1">
+              <div>Kaum: ${m.Kaum} | Agama: ${m.Agama}</div>
+              <div>Tel Penjaga: ${m.No_Tel_Penjaga_1} ${m.No_Tel_Penjaga_2 ? '/ ' + m.No_Tel_Penjaga_2 : ''}</div>
+            </td>
+            <td class="p-4 text-xs font-bold space-y-1">
+              <div><span class="inline-block w-16 text-[9px] text-slate-400 uppercase">Uniform:</span> ${uniformText}</div>
+              <div><span class="inline-block w-16 text-[9px] text-indigo-400 uppercase">Kelab:</span> ${kelabText}</div>
+              <div><span class="inline-block w-16 text-[9px] text-emerald-400 uppercase">Sukan:</span> ${sukanText}</div>
+              <div><span class="inline-block w-16 text-[9px] text-rose-400 uppercase">Rumah:</span> ${rumahText}</div>
+            </td>
+            <td class="p-4 text-center">
+              ${userActive.peranan === 'Admin' ? `
+                <button onclick="bukaModalMurid('${m.No_IC}')" class="bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-600 font-extrabold px-3 py-2 rounded-xl text-xs transition shadow-sm">
+                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+              ` : '<span class="text-slate-400 italic text-xs font-medium">Buku Sahaja</span>'}
+            </td>
+          </tr>
+        `;
+        body.innerHTML += row;
+      });
+    }
+
+    // --- SEKSYEN 3: REKOD STATISTIK KEHADIRAN ADMIN ---
+    function paparAdminKehadiran() {
+      const thn = document.getElementById('adminKhdTahun').value;
+      const tb = document.getElementById('tblAdminKhdBody');
+      if (!tb) return;
+      tb.innerHTML = '';
+      
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(khdData) {
+          rawKehadiranData = khdData || [];
+          toggleLoader(false);
+
+          const kats = ["Unit Uniform", "Kelab Persatuan", "Sukan Permainan", "Rumah Sukan"];
+          kats.forEach(kat => {
+            let units = allKokoUnits.filter(u => u.Kategori === kat);
+            if(units.length > 0) {
+              tb.innerHTML += `
+                <tr class="bg-indigo-50/50">
+                  <td colspan="13" class="p-3 font-extrabold text-indigo-900 text-[10px] uppercase tracking-widest">${kat}</td>
+                </tr>
+              `;
+              
+              units.forEach(u => {
+                let mList = allMurids.filter(m => {
+                  let matchUnit = (m.Unit_Uniform === u.Nama_Unit || m.Kelab_Persatuan === u.Nama_Unit || m.Sukan_Permainan === u.Nama_Unit || m.Rumah_Sukan === u.Nama_Unit);
+                  let matchTahun = (thn === "Semua" || m.Kelas.startsWith(thn + " "));
+                  return matchUnit && matchTahun;
+                });
+                
+                let totalAhli = mList.length;
+                let rowHadir = Array(12).fill(0);
+                
+                mList.forEach(m => {
+                  let khd = rawKehadiranData.find(k => bersihkanIC(k.No_IC) === bersihkanIC(m.No_IC) && k.Nama_Unit === u.Nama_Unit);
+                  if(khd) {
+                    for(let i=0; i<12; i++) {
+                      if(khd.H[i] === "H") rowHadir[i]++;
+                    }
+                  }
+                });
+
+                let cells = '';
+                for(let i=0; i<12; i++) {
+                  let clr = rowHadir[i] > 0 ? (rowHadir[i] === totalAhli ? 'text-emerald-600 font-extrabold' : 'text-indigo-600 font-bold') : 'text-slate-300 font-normal';
+                  cells += `<td class="p-2 text-center border-l border-slate-100 ${clr}">${rowHadir[i]}/${totalAhli}</td>`;
+                }
+
+                tb.innerHTML += `
+                  <tr class="hover:bg-slate-50 transition">
+                    <td class="p-4 pl-8 text-slate-700 font-bold text-xs">${u.Nama_Unit}</td>
+                    ${cells}
+                  </tr>
+                `;
+              });
+            }
+          });
+        })
+        .withFailureHandler(function() {
+          toggleLoader(false);
+          showToast("Ralat mendapatkan rekod statistik kehadiran.", true);
+        })
+        .getSemuaKehadiranAdmin();
+    }
+
+    // --- SEKSYEN 4A: GURU PENANDAAN KEHADIRAN 1 CHECKBOX ---
+    function paparKehadiranSection() {
+      const sel = document.getElementById('selKokoKehadiran');
+      sel.innerHTML = '';
+      let listU = [];
+
+      if(userActive.peranan === "Guru") {
+        listU = allKokoUnits.filter(u => u.Guru_Penasihat.includes(userActive.nama));
+        document.getElementById('divPilihPerjumpaan').classList.remove('hidden');
+        document.getElementById('btnSaveKehadiranAllTop').classList.remove('hidden');
+        document.getElementById('btnSaveKehadiranAllBottom').classList.remove('hidden');
+        document.getElementById('boxNotifikasiKehadiran').classList.add('hidden');
+      } else if(userActive.peranan === "Murid") {
+        let m = allMurids.find(x => bersihkanIC(x.No_IC) === bersihkanIC(userActive.ic));
+        if(m) {
+          if(m.Unit_Uniform) listU.push({Nama_Unit: m.Unit_Uniform, Kategori: 'Unit Uniform'});
+          if(m.Kelab_Persatuan) listU.push({Nama_Unit: m.Kelab_Persatuan, Kategori: 'Kelab Persatuan'});
+          if(m.Sukan_Permainan) listU.push({Nama_Unit: m.Sukan_Permainan, Kategori: 'Sukan Permainan'});
+          if(m.Rumah_Sukan) listU.push({Nama_Unit: m.Rumah_Sukan, Kategori: 'Rumah Sukan'});
+        }
+        document.getElementById('divPilihPerjumpaan').classList.add('hidden');
+        document.getElementById('btnSaveKehadiranAllTop').classList.add('hidden');
+        document.getElementById('btnSaveKehadiranAllBottom').classList.add('hidden');
+        
+        // PEMBERSIHAN PAPARAN MURID (AMARAN & MAKLUMAT JAWATAN/GURU PENASIHAT)
+        const boxNotif = document.getElementById('boxNotifikasiKehadiran');
+        boxNotif.className = "p-4 rounded-2xl font-bold text-xs uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-100 flex items-center";
+        boxNotif.innerHTML = "<i class='fa-solid fa-circle-exclamation mr-2 text-sm'></i> Sila berjumpa dengan guru penasihat unit masing-masing sekiranya status kehadiran ada kesilapan.";
+        boxNotif.classList.remove('hidden');
+      }
+
+      listU.forEach(u => {
+        sel.innerHTML += `<option value="${u.Nama_Unit}" data-cat="${u.Kategori}">${u.Nama_Unit} (${u.Kategori})</option>`;
+      });
+
+      document.getElementById('kehadiranTableContainer').classList.add('hidden');
+      document.getElementById('cardInfoMurid').classList.add('hidden');
+    }
+
+    function paparKehadiranAhliGuru() {
+      const sel = document.getElementById('selKokoKehadiran');
+      const unit = sel.value;
+      if(!unit) return;
+
+      const opt = sel.options[sel.selectedIndex];
+      const kat = opt.getAttribute('data-cat') || "";
+
+      toggleLoader(true);
+      
+      const cardInfo = document.getElementById('cardInfoMurid');
+      if (cardInfo) cardInfo.classList.add('hidden');
+
+      google.script.run
+        .withSuccessHandler(function(khdData) {
+          rawKehadiranData = khdData || [];
+
+          if (userActive.peranan === "Murid") {
+            google.script.run
+              .withSuccessHandler(function(activities) {
+                toggleLoader(false);
+                
+                const tb = document.getElementById('tblKehadiranBody');
+                tb.innerHTML = '';
+                
+                const th = document.getElementById('tblKehadiranHeader');
+                th.innerHTML = `
+                  <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 text-xs font-bold">
+                    <th class="p-4">Bil. Perjumpaan</th>
+                    <th class="p-4">Tarikh</th>
+                    <th class="p-4">Tajuk Aktiviti</th>
+                    <th class="p-4 text-center">Kehadiran Saya</th>
+                  </tr>
+                `;
+                
+                document.getElementById('kehadiranTableContainer').classList.remove('hidden');
+                document.getElementById('btnSaveKehadiranAllTop').classList.add('hidden');
+                document.getElementById('btnSaveKehadiranAllBottom').classList.add('hidden');
+                if (cardInfo) cardInfo.classList.remove('hidden');
+
+                let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(userActive.ic) && x.Nama_Unit === unit);
+
+                // Kemas kini kad metadata (Nama, Kelas, Jawatan, Guru Penasihat) secara automatik
+                google.script.run.withSuccessHandler(res => {
+                  if (res && res.success) {
+                    document.getElementById('lblInfoNama').innerText = res.nama;
+                    document.getElementById('lblInfoKelas').innerText = res.kelas;
+                    document.getElementById('lblInfoJawatan').innerText = res.jawatan;
+                    document.getElementById('lblInfoGuru').innerText = res.guruPenasihat;
+                  }
+                }).dapatkanInfoMuridLengkap(userActive.ic, unit);
+                
+                // Bina struktur baris demi baris perjumpaan 1 hingga 12 untuk murid yang log masuk
+                for (let i = 1; i <= 12; i++) {
+                  let act = (activities || []).find(a => parseInt(a.Bil) === i);
+                  let tarikhStr = act ? act.Tarikh : '<span class="text-slate-400 italic">Belum Ditetapkan</span>';
+                  let tajukStr = act ? act.Tajuk : '<span class="text-slate-400 italic">Tiada Rekod Aktiviti</span>';
+                  
+                  let statusHadir = "A"; 
+                  if (k) {
+                    statusHadir = k.H[i - 1];
+                  }
+                  
+                  let badge = '';
+                  if (statusHadir === "H") {
+                    badge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800"><i class="fa-solid fa-circle-check mr-1.5"></i> HADIR</span>';
+                  } else {
+                    badge = '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-800"><i class="fa-solid fa-circle-xmark mr-1.5"></i> TIDAK HADIR</span>';
+                  }
+                  
+                  tb.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50/50 transition text-xs">
+                      <td class="p-4 font-extrabold text-indigo-900">Perjumpaan ${i}</td>
+                      <td class="p-4 font-medium text-slate-600">${tarikhStr}</td>
+                      <td class="p-4 font-bold text-slate-800">${tajukStr}</td>
+                      <td class="p-4 text-center">${badge}</td>
+                    </tr>
+                  `;
+                }
+              })
+              .getAktivitiKoko(unit);
+          } else {
+            // Paparan untuk Guru mengisi Kehadiran mengikut perjumpaan yang dipilih (1 Checkbox)
+            google.script.run
+              .withSuccessHandler(function(mList) {
+                toggleLoader(false);
+                let senaraiAsalAhli = (mList || []).filter(m => [m.Unit_Uniform, m.Kelab_Persatuan, m.Sukan_Permainan, m.Rumah_Sukan].includes(unit));
+
+                // 2. PROSES TAPISAN TAHUN (VERSI KEBAL & SELAMAT)
+                const tahunDipilih = document.getElementById('selTapisTahun').value;
+                if (tahunDipilih !== "SEMUA") {
+                  senaraiAhliFiltered = senaraiAsalAhli.filter(m => {
+                    // Tukar data kelas kepada teks, buang ruang kosong, dan tukar ke Huruf Besar
+                    let kelasString = m.Kelas ? m.Kelas.toString().trim().toUpperCase() : "";
+                    
+                    // Jika data kelas kosong, jangan buang terus, semak jika ada data alternatif
+                    if (kelasString === "") return false;
+                    
+                    // Menguji sama ada teks kelas mengandungi digit tahun (contoh: mengandung angka "4", "5", atau "6")
+                    // Sama ada ditulis "4 Cerdik", "4C", "TAHUN 4" - semuanya akan lepas tapisan ini.
+                    return kelasString.includes(tahunDipilih);
+                  });
+                } else {
+                  senaraiAhliFiltered = senaraiAsalAhli;
+                }
+
+                const tb = document.getElementById('tblKehadiranBody');
+                tb.innerHTML = '';
+                
+                const th = document.getElementById('tblKehadiranHeader');
+                th.innerHTML = `
+                  <tr class="bg-slate-50 text-slate-500 border-b border-slate-100 text-xs font-bold">
+                    <th class="p-4">Nama & Kelas Ahli</th>
+                    <th class="p-4">Jawatan</th>
+                    <th id="thKehadiran" class="p-4 text-center w-48">Tanda Hadir</th>
+                  </tr>
+                `;
+                
+                document.getElementById('kehadiranTableContainer').classList.remove('hidden');
+                
+                let bil = document.getElementById('selBilPerjumpaan').value;
+                document.getElementById('thKehadiran').textContent = `Hadir Perjumpaan ${bil}?`;
+
+                // KONTROL BUTANG ATAS (TOP)
+                const btnTop = document.getElementById('btnSaveKehadiranAllTop');
+                if (btnTop) {
+                  btnTop.classList.remove('hidden');
+                  btnTop.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> SIMPAN PERJUMPAAN ${bil}`;
+                }
+
+                // KONTROL BUTANG BAWAH (BOTTOM)
+                const btnBottom = document.getElementById('btnSaveKehadiranAllBottom');
+                if (btnBottom) {
+                  btnBottom.classList.remove('hidden');
+                  btnBottom.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> SIMPAN PERJUMPAAN ${bil}`;
+                }
+                
+                if (senaraiAhliFiltered.length === 0) {
+                  tb.innerHTML = `<tr><td colspan="3" class="p-6 text-center text-slate-400">Tiada ahli kokurikulum berdaftar di bawah unit ini.</td></tr>`;
+                  return;
+                }
+
+                senaraiAhliFiltered.forEach((m, idx) => {
+                  let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(m.No_IC) && x.Nama_Unit === unit);
+                  let isH = (!k || k.H[bil-1] === "H" || k.H[bil-1] === "" || k.H[bil-1] === undefined) ? "checked" : "";
+                  
+                  tb.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50 transition text-xs">
+                      <td class="p-4 font-bold text-slate-800">${m.Nama_Penuh}<br><span class="text-[9px] text-slate-400 font-bold uppercase">Kelas: ${m.Kelas}</span></td>
+                      <td class="p-4 text-xs font-semibold text-slate-500">${k ? k.Jawatan : 'Ahli Biasa'}</td>
+                      <td class="p-4 text-center">
+                        <input type="checkbox" id="khd_chk_v1_${idx}" ${isH} class="w-5 h-5 text-indigo-600 border-gray-300 rounded-xl focus:ring-indigo-500 cursor-pointer">
+                      </td>
+                    </tr>
+                  `;
+                });
+              })
+              .getMaklumatMurid(userActive.ic, 'Admin');
+          }
+        })
+        .getKehadiranAhli(unit);
+    }
+
+    function simpanKehadiranSatuPerjumpaan() {
+      let selectKoko = document.getElementById('selKokoKehadiran');
+      let unit = selectKoko.value, bil = parseInt(document.getElementById('selBilPerjumpaan').value), kat = selectKoko.selectedOptions[0].getAttribute('data-cat');
+      
+      let listHantar = [];
+      senaraiAhliFiltered.forEach((m, idx) => {
+        let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(m.No_IC) && x.Nama_Unit === unit);
+        let hList = k ? [...k.H] : Array(12).fill("A");
+        let jwt = k ? k.Jawatan : "Ahli Biasa";
+        
+        hList[bil - 1] = document.getElementById(`khd_chk_v1_${idx}`).checked ? "H" : "A";
+        
+        listHantar.push({
+          No_IC: m.No_IC,
+          Nama_Unit: unit,
+          Kategori: kat,
+          Jawatan: jwt,
+          H: hList
+        });
+      });
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          showToast(res.message);
+          google.script.run.withSuccessHandler(d => { rawKehadiranData = d || []; paparKehadiranAhliGuru(); }).getSemuaKehadiranAdmin();
+        })
+        .withFailureHandler(function() {
+          toggleLoader(false);
+          showToast("Ralat memproses penulisan kehadiran.", true);
+        })
+        .simpanKehadiranAhli(listHantar, userActive.ic, userActive.nama);
+    }
+
+    // --- SEKSYEN PERJUMPAAN MINGGUAN ---
+    function paparPerjumpaanSection() {
+      const sel = document.getElementById('selKokoPerjumpaan');
+      sel.innerHTML = '<option value="">-- Pilih Unit Kokurikulum --</option>';
+      let listU = [];
+
+      if(userActive.peranan === "Guru") {
+        listU = allKokoUnits.filter(u => u.Guru_Penasihat.includes(userActive.nama));
+      } else if(userActive.peranan === "Admin") {
+        listU = allKokoUnits;
+      }
+
+      listU.forEach(u => {
+        sel.innerHTML += `<option value="${u.Nama_Unit}" data-cat="${u.Kategori}">${u.Nama_Unit} (${u.Kategori})</option>`;
+      });
+
+      // Reset jadual perjumpaan
+      document.getElementById('tblPerjumpaanBody').innerHTML = `
+        <tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Sila pilih unit kokurikulum di atas terlebih dahulu.</td></tr>
+      `;
+    }
+
+    function tapisLaporanPerjumpaan() {
+      const unit = document.getElementById('selKokoPerjumpaan').value;
+      const tbody = document.getElementById('tblPerjumpaanBody');
+      if (!unit) {
+        tbody.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Sila pilih unit kokurikulum di atas terlebih dahulu.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold"><i class="fa-solid fa-circle-notch animate-spin text-lg mr-2"></i>Memuatkan rekod perjumpaan...</td></tr>`;
+
+      google.script.run
+        .withSuccessHandler(function(activities) {
+          allAktivitiKoko = activities || [];
+          let filtered = allAktivitiKoko.filter(a => a.Nama_Unit === unit);
+
+          if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Tiada rekod laporan perjumpaan diisi bagi unit ini.</td></tr>`;
+            return;
+          }
+
+          // Isih perjumpaan mengikut nombor perjumpaan secara menaik
+          filtered.sort((a,b) => parseInt(a.Bil) - parseInt(b.Bil));
+
+          tbody.innerHTML = '';
+          filtered.forEach((p, index) => {
+            // Pengiraan pecahan statistik kehadiran murid (Tahun 4, 5, 6)
+            let totalThn4 = 0, hadirThn4 = 0;
+            let totalThn5 = 0, hadirThn5 = 0;
+            let totalThn6 = 0, hadirThn6 = 0;
+
+            let unitMembers = allMurids.filter(m => [m.Unit_Uniform, m.Kelab_Persatuan, m.Sukan_Permainan, m.Rumah_Sukan].includes(unit));
+            unitMembers.forEach(m => {
+              let kelasName = m.Kelas || "";
+              let isY4 = kelasName.startsWith("4 ");
+              let isY5 = kelasName.startsWith("5 ");
+              let isY6 = kelasName.startsWith("6 ");
+
+              if (isY4) totalThn4++;
+              if (isY5) totalThn5++;
+              if (isY6) totalThn6++;
+
+              let khd = rawKehadiranData.find(k => bersihkanIC(k.No_IC) === bersihkanIC(m.No_IC) && k.Nama_Unit === unit);
+              if (khd && khd.H && khd.H[parseInt(p.Bil) - 1] === "H") {
+                if (isY4) hadirThn4++;
+                if (isY5) hadirThn5++;
+                if (isY6) hadirThn6++;
+              }
+            });
+
+            // Pengiraan kehadiran guru penasihat
+            let unitInfo = allKokoUnits.find(u => u.Nama_Unit === unit);
+            let totalGurus = unitInfo ? (unitInfo.Guru_Penasihat || "").split(',').filter(x => x.trim()).length : 0;
+            let hadirGurus = (p.Guru_Hadir || "").split(',').filter(x => x.trim()).length;
+
+            let guruListHtml = p.Guru_Hadir 
+              ? p.Guru_Hadir.split(',').map(x => `<span class="inline-block bg-emerald-50 text-emerald-800 text-[10px] px-2 py-0.5 rounded-lg border border-emerald-100 mr-1 mb-1 font-bold">${x.trim()}</span>`).join('')
+              : '<span class="text-rose-400 italic">Tiada Guru Hadir</span>';
+
+            let mediaHtml = '';
+            if (p.Gambar_1) mediaHtml += `<a href="${p.Gambar_1}" target="_blank" class="block text-[11px] text-indigo-600 hover:underline font-extrabold mb-1"><i class="fa-solid fa-image"></i> Gambar 1</a>`;
+            if (p.Gambar_2) mediaHtml += `<a href="${p.Gambar_2}" target="_blank" class="block text-[11px] text-indigo-600 hover:underline font-extrabold mb-1"><i class="fa-solid fa-image"></i> Gambar 2</a>`;
+            if (p.Gambar_3) mediaHtml += `<a href="${p.Gambar_3}" target="_blank" class="block text-[11px] text-indigo-600 hover:underline font-extrabold"><i class="fa-solid fa-image"></i> Gambar 3</a>`;
+            if (!mediaHtml) mediaHtml = '<span class="text-slate-300 italic text-xs">Tiada fail</span>';
+
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50 transition border-b text-xs">
+                <td class="p-4 text-center font-extrabold text-indigo-600 text-sm">P${p.Bil}</td>
+                <td class="p-4">
+                  <div class="font-extrabold text-slate-800 text-sm">${p.Tajuk}</div>
+                  <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-1"><i class="fa-regular fa-calendar-days mr-1"></i>Tarikh: ${p.Tarikh}</div>
+                </td>
+                <td class="p-4 max-w-xs">
+                  <div class="font-semibold text-slate-700 whitespace-pre-line">${p.Keterangan}</div>
+                  ${p.Catatan ? `<div class="mt-2 p-2 bg-amber-50/50 rounded-xl border border-amber-100 text-[10px] font-bold text-amber-800"><span class="uppercase text-[9px] block text-amber-500 tracking-wider">Catatan:</span> ${p.Catatan}</div>` : ''}
+                </td>
+                <td class="p-4 font-bold text-slate-600 space-y-1">
+                  <div class="flex justify-between border-b pb-0.5 border-slate-100"><span>Tahun 4:</span> <span class="text-indigo-600">${hadirThn4} / ${totalThn4}</span></div>
+                  <div class="flex justify-between border-b pb-0.5 border-slate-100"><span>Tahun 5:</span> <span class="text-indigo-600">${hadirThn5} / ${totalThn5}</span></div>
+                  <div class="flex justify-between border-b pb-0.5 border-slate-100"><span>Tahun 6:</span> <span class="text-indigo-600">${hadirThn6} / ${totalThn6}</span></div>
+                  <div class="flex justify-between text-indigo-950 pt-0.5 font-extrabold"><span>Guru:</span> <span>${hadirGurus} / ${totalGurus}</span></div>
+                </td>
+                <td class="p-4">
+                  <div class="max-w-[180px]">${guruListHtml}</div>
+                </td>
+                <td class="p-4 text-center font-bold">${mediaHtml}</td>
+                <td class="p-4 text-center">
+                  <div class="flex justify-center gap-1.5">
+                    <button onclick="bukaModalPerjumpaan('${p.ID}')" class="w-8 h-8 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition flex items-center justify-center shadow-sm">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button onclick="handlePadamPerjumpaan('${p.ID}')" class="w-8 h-8 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition flex items-center justify-center shadow-sm">
+                      <i class="fa-solid fa-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        })
+        .getAktivitiKoko(unit);
+    }
+
+    function dapatkanBase64(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) resolve({ data: null, name: "", type: "" });
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const base64Data = dataUrl.split(',')[1];
+          resolve({
+            data: base64Data,
+            name: file.name,
+            type: file.type
+          });
+        };
+        reader.onerror = error => reject(error);
+      });
+    }
+
+    function bukaModalPerjumpaan(id = '') {
+      const form = document.getElementById('formPerjumpaan');
+      
+      document.getElementById('formPerjumpaan').reset();
+      document.getElementById('prmId').value = ''; // Membaiki rujukan pembolehubah ID perjumpaan tersembunyi
+      document.getElementById('prmGuruChecklist').innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
+      document.getElementById('modalPerjumpaanTitle').textContent = "Isi Laporan Perjumpaan Kokurikulum";
+
+      // Populasi senarai pilihan Unit Koko berdinamik mengikut kuasa hak guru/admin
+      const prmUnit = document.getElementById('prmUnitKoko');
+      prmUnit.innerHTML = '<option value="">-- Pilih Unit Koko --</option>';
+      let listU = [];
+
+      if(userActive.peranan === "Guru") {
+        listU = allKokoUnits.filter(u => u.Guru_Penasihat.includes(userActive.nama));
+      } else if(userActive.peranan === "Admin") {
+        listU = allKokoUnits;
+      }
+
+      listU.forEach(u => {
+        prmUnit.innerHTML += `<option value="${u.Nama_Unit}">${u.Nama_Unit} (${u.Kategori})</option>`;
+      });
+
+      if (id) {
+        // Mode kemas kini laporan lama
+        let p = allAktivitiKoko.find(x => x.ID.toString() === id.toString());
+        if (p) {
+          document.getElementById('modalPerjumpaanTitle').textContent = "Kemaskini Laporan Perjumpaan";
+          document.getElementById('prmId').value = p.ID;
+          document.getElementById('prmUnitKoko').value = p.Nama_Unit;
+          
+          // Populasi checklist guru penasihat secara langsung sebelum tick unit berkaitan
+          populasiGuruPenasihatCheckbox();
+
+          document.getElementById('prmBil').value = p.Bil;
+          document.getElementById('prmTarikh').value = p.Tarikh;
+          document.getElementById('prmTajuk').value = p.Tajuk;
+          document.getElementById('prmKeterangan').value = p.Keterangan;
+          document.getElementById('prmCatatan').value = p.Catatan || '';
+          document.getElementById('prmImg1').value = p.Gambar_1 || '';
+          document.getElementById('prmImg2').value = p.Gambar_2 || '';
+          document.getElementById('prmImg3').value = p.Gambar_3 || '';
+
+          // Tanda tick pada nama guru penasihat yang disimpan sebelum ini
+          let checkedGurus = p.Guru_Hadir ? p.Guru_Hadir.split(',').map(x => x.trim()) : [];
+          setTimeout(() => {
+            document.querySelectorAll('input[name="prmGurus"]').forEach(c => {
+              if (checkedGurus.includes(c.value)) c.checked = true;
+            });
+          }, 100);
+        }
+      }
+
+      document.getElementById('modalPerjumpaan').classList.remove('hidden');
+    }
+
+    function closeModalPerjumpaan() {
+      document.getElementById('modalPerjumpaan').classList.add('hidden');
+    }
+
+    // Pastikan fungsi ini wujud dalam skrip anda
+    function populasiGuruPenasihatCheckbox() {
+      const unitTerpilih = document.getElementById('prmUnitKoko').value;
+      const container = document.getElementById('prmGuruChecklist');
+      
+      if (!unitTerpilih) {
+        container.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
+        return;
+      }
+
+      // Cari unit tersebut dalam data global
+      const unitData = allKokoUnits.find(u => u.Nama_Unit === unitTerpilih);
+      if (unitData) {
+        // Tukar string guru kepada array
+        let senaraiGuru = unitData.Guru_Penasihat.split(',').map(g => g.trim());
+        container.innerHTML = senaraiGuru.map(g => `
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="prmGurus" value="${g}" class="rounded">
+            <span>${g}</span>
+          </label>
+        `).join('');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const prmUnitKoko = document.getElementById('prmUnitKoko');
+      if (prmUnitKoko) {
+        prmUnitKoko.addEventListener('change', populasiGuruPenasihatCheckbox);
+      }
+    });
+
+    async function simpanDataPerjumpaan() {
+      document.getElementById('modalPerjumpaan').classList.add('hidden');
+      // Tunjukkan loader jika anda mempunyai sistem loader (cth: toggleLoader(true))
+      if (typeof toggleLoader === 'function') toggleLoader(true);
+
+      try {
+        // 1. Ambil elemen fail imej dari HTML
+        const fileInput1 = document.getElementById('prmFile1');
+        const fileInput2 = document.getElementById('prmFile2');
+        const fileInput3 = document.getElementById('prmFile3');
+
+        // 2. Tukar fail imej kepada format Base64 (menggunakan fungsi helper)
+        const file1 = fileInput1 && fileInput1.files[0] ? await dapatkanBase64(fileInput1.files[0]) : null;
+        const file2 = fileInput2 && fileInput2.files[0] ? await dapatkanBase64(fileInput2.files[0]) : null;
+        const file3 = fileInput3 && fileInput3.files[0] ? await dapatkanBase64(fileInput3.files[0]) : null;
+
+        // 3. Ambil nilai checkbox guru yang dipilih
+        let guruHadir = [];
+        document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => {
+          guruHadir.push(c.value);
+        });
+
+        const prmUnit = document.getElementById('prmUnitKoko');
+        const kategoriTerpilih = prmUnit.options[prmUnit.selectedIndex]?.text.match(/\(([^)]+)\)/)?.[1] || "";
+
+        // 4. Bina objek data utama
+        let dataForm = {
+          ID: document.getElementById('prmId').value,
+          Nama_Unit: prmUnit.value,
+          Kategori: kategoriTerpilih,
+          Bil: document.getElementById('prmBil').value, 
+          Tarikh: document.getElementById('prmTarikh').value,
+          Tajuk: document.getElementById('prmTajuk').value,
+          Keterangan: document.getElementById('prmKeterangan').value,
+          Catatan: document.getElementById('prmCatatan').value,
+          Guru_Hadir: guruHadir.join(', ')
+        };
+
+        // 5. Satukan data borang dan data fail untuk dihantar ke backend
+        let payload = {
+          borang: dataForm,
+          fail1: file1,
+          fail2: file2,
+          fail3: file3
+        };
+
+        // 6. Hantar ke Google Apps Script backend
+        google.script.run
+          .withSuccessHandler(res => {
+            if (typeof toggleLoader === 'function') toggleLoader(false);
+            alert(res.message);
+            document.getElementById('modalPerjumpaan').classList.add('hidden');
+            
+            // Muat semula jadual/paparan senarai perjumpaan
+            if (typeof tapisLaporanPerjumpaan === 'function') {
+              tapisLaporanPerjumpaan();
+            }
+          })
+          .withFailureHandler(err => {
+            if (typeof toggleLoader === 'function') toggleLoader(false);
+            alert("Ralat sistem backend: " + err.message);
+          })
+          .simpanDataPerjumpaanBackend(payload);
+
+      } catch (error) {
+        if (typeof toggleLoader === 'function') toggleLoader(false);
+        alert("Gagal memproses fail imej: " + error.message);
+      }
+    }
+    function populasiGuruPenasihatCheckbox() {
+      const unit = document.getElementById('prmUnitKoko').value;
+      const div = document.getElementById('prmGuruChecklist');
+      if (!unit) {
+        div.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
+        return;
+      }
+
+      div.innerHTML = '';
+      let unitInfo = allKokoUnits.find(u => u.Nama_Unit === unit);
+      if (unitInfo && unitInfo.Guru_Penasihat) {
+        let listGurus = unitInfo.Guru_Penasihat.split(',');
+        listGurus.forEach(g => {
+          let namaG = g.trim();
+          if (namaG) {
+            div.innerHTML += `
+              <label class="flex items-center space-x-2.5 cursor-pointer py-1 hover:bg-slate-100 rounded px-1 transition">
+                <input type="checkbox" name="prmGurus" value="${namaG}" class="rounded text-indigo-600 focus:ring-indigo-500 w-4.5 h-4.5">
+                <span class="text-slate-700">${namaG}</span>
+              </label>
+            `;
+          }
+        });
+      } else {
+        div.innerHTML = '<span class="text-rose-400 italic">Tiada Guru Penasihat didaftarkan dalam unit ini.</span>';
+      }
+    }
+
+    function handleSimpanPerjumpaan(e) {
+      e.preventDefault();
+      const unit = document.getElementById('prmUnitKoko').value;
+      if (!unit) {
+        showToast("Sila pilih unit kokurikulum terlebih dahulu!", true);
+        return;
+      }
+
+      let tickedGurus = [];
+      document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => tickedGurus.push(c.value));
+
+      let opt = document.getElementById('prmUnitKoko').selectedOptions[0];
+      let fullText = opt ? opt.text : "";
+      let kat = fullText.includes("Uniform") ? "Unit Uniform" : (fullText.includes("Kelab") ? "Kelab Persatuan" : (fullText.includes("Sukan") ? "Sukan Permainan" : "Rumah Sukan"));
+
+      const activePerjumpaanData = {
+        ID_Aktiviti: document.getElementById('prmId').value, // Menggunakan rujukan prmId yang betul
+        Nama_Unit: unit,
+        Kategori: kat,
+        Bil_Perjumpaan: document.getElementById('prmBil').value,
+        Tarikh: document.getElementById('prmTarikh').value,
+        Tajuk_Aktiviti: document.getElementById('prmTajuk').value.toUpperCase(),
+        Keterangan: document.getElementById('prmKeterangan').value,
+        Catatan: document.getElementById('prmCatatan').value,
+        Guru_Hadir: tickedGurus.join(', '),
+        Gambar_1: document.getElementById('prmImg1').value,
+        Gambar_2: document.getElementById('prmImg2').value,
+        Gambar_3: document.getElementById('prmImg3').value
+      };
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if (res.success) {
+            showToast(res.message);
+            closeModalPerjumpaan();
+            
+            // Reload senarai
+            google.script.run.withSuccessHandler(function(aktivitiData) {
+              allAktivitiKoko = aktivitiData || [];
+              
+              // Set filter dropdown pada unit yang baru diisi untuk segarkan senarai
+              document.getElementById('selKokoPerjumpaan').value = unit;
+              tapisLaporanPerjumpaan();
+            }).getAktivitiKoko(null);
+          } else {
+            showToast(res.message, true);
+          }
+        })
+        .withFailureHandler(function(err) {
+          toggleLoader(false);
+          showToast("Ralat menyimpan laporan perjumpaan: " + err.message, true);
+        })
+        .simpanAktivitiKoko(activePerjumpaanData, userActive.ic, userActive.nama);
+    }
+
+    function uploadGambar(no){
+      const file =
+        document.getElementById("uploadImg"+no).files[0];
+      if(!file){
+        alert("Sila pilih gambar dahulu");
+        return;
+      }
+      const unit = document.getElementById("prmUnitKoko").value;
+      const bil = document.getElementById("prmBil").value;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const base64 =
+          e.target.result.split(",")[1];
+        google.script.run
+          .withSuccessHandler(function(result){
+            document.getElementById("prmImg"+no).value =
+              result.url;
+            const preview =
+              document.getElementById("preview"+no);
+            preview.src = result.url;
+            preview.classList.remove("hidden");
+            alert("Upload berjaya");
+          })
+          .withFailureHandler(function(err){
+            alert(err.message);
+          })
+          .uploadImageToDrive(file.name, file.type, base64, unit, bil);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handlePadamPerjumpaan(id) {
+      if(!confirm("Adakah anda pasti ingin memadam laporan perjumpaan ini?")) return;
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if(res.success) {
+            showToast(res.message);
+            
+            // Reload senarai
+            const activeUnit = document.getElementById('selKokoPerjumpaan').value;
+            google.script.run.withSuccessHandler(function(aktivitiData) {
+              allAktivitiKoko = aktivitiData || [];
+              tapisLaporanPerjumpaan();
+            }).getAktivitiKoko(null);
+          } else {
+            showToast(res.message, true);
+          }
+        })
+        .withFailureHandler(function(err) {
+          toggleLoader(false);
+          showToast("Ralat memadam laporan perjumpaan: " + err.message, true);
+        })
+        .padamAktivitiKoko(id, userActive.ic, userActive.nama);
+    }
+
+    // --- SEKSYEN 4C: JAWATAN AHLI PAGE ---
+    function paparJawatanSection() {
+      let sel = document.getElementById('selKokoJawatan');
+      sel.innerHTML = '';
+      let listU = allKokoUnits.filter(u => u.Guru_Penasihat.includes(userActive.nama));
+      listU.forEach(u => {
+        sel.innerHTML += `<option value="${u.Nama_Unit}" data-cat="${u.Kategori}">${u.Nama_Unit}</option>`;
+      });
+      document.getElementById('jawatanTableContainer').classList.add('hidden');
+    }
+
+    function paparJawatanAhli() {
+      let unit = document.getElementById('selKokoJawatan').value; if(!unit) return;
+      document.getElementById('jawatanTableContainer').classList.remove('hidden');
+      
+      let tb = document.getElementById('tblJawatanBody');
+      tb.innerHTML = '';
+      
+      senaraiAhliFiltered = allMurids.filter(m => [m.Unit_Uniform, m.Kelab_Persatuan, m.Sukan_Permainan, m.Rumah_Sukan].includes(unit));
+      
+      senaraiAhliFiltered.forEach((m, idx) => {
+        let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(m.No_IC) && x.Nama_Unit === unit);
+        let j = k ? k.Jawatan : "Ahli Biasa";
+        
+        tb.innerHTML += `
+          <tr class="border-b text-xs">
+            <td class="p-4 font-bold text-slate-800">${m.Nama_Penuh}</td>
+            <td class="p-4 text-xs font-bold text-slate-400">${m.Kelas}</td>
+            <td class="p-4">
+              <select id="jwt_edit_v1_${idx}" class="w-full text-xs p-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none font-semibold focus:ring-2 focus:ring-indigo-500">
+                <option value="Ahli Biasa" ${j==='Ahli Biasa'?'selected':''}>Ahli Biasa</option>
+                <option value="Pengerusi" ${j==='Pengerusi'?'selected':''}>Pengerusi</option>
+                <option value="Naib Pengerusi" ${j==='Naib Pengerusi'?'selected':''}>Naib Pengerusi</option>
+                <option value="Setiausaha" ${j==='Setiausaha'?'selected':''}>Setiausaha</option>
+                <option value="Penolong Setiausaha" ${j==='Penolong Setiausaha'?'selected':''}>Pen. Setiausaha</option>
+                <option value="Bendahari" ${j==='Bendahari'?'selected':''}>Bendahari</option>
+                <option value="Penolong Bendahari" ${j==='Penolong Bendahari'?'selected':''}>Pen. Bendahari</option>
+                <option value="Ahli Jawatankuasa" ${j==='Ahli Jawatankuasa'?'selected':''}>AJK</option>
+              </select>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function simpanSemuaJawatan() {
+      let unit = document.getElementById('selKokoJawatan').value;
+      let kat = document.getElementById('selKokoJawatan').selectedOptions[0].getAttribute('data-cat');
+      let hantar = [];
+
+      senaraiAhliFiltered.forEach((m, idx) => {
+        let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(m.No_IC) && x.Nama_Unit === unit);
+        let h = k ? [...k.H] : Array(12).fill("A");
+        let newJ = document.getElementById(`jwt_edit_v1_${idx}`).value;
+        hantar.push({No_IC: m.No_IC, Nama_Unit: unit, Kategori: kat, Jawatan: newJ, H: h});
+      });
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          showToast(res.message);
+          google.script.run.withSuccessHandler(d => { rawKehadiranData = d || []; }).getSemuaKehadiranAdmin();
+        })
+        .withFailureHandler(function() {
+          toggleLoader(false);
+          showToast("Ralat menyimpan jawatan.", true);
+        })
+        .simpanKehadiranAhli(hantar, userActive.ic, userActive.nama);
+    }
+
+    // --- SEKSYEN 5: PENGURUSAN GURU DAN PENGGUNA ---
+    function paparDataPenggunaSection() {
+      const tbody = document.getElementById('tblSenaraiGuru');
+      if(!tbody) return;
+      tbody.innerHTML = `<tr><td colspan='3' class='p-5 text-center text-slate-400'><i class='fa-solid fa-spinner animate-spin mr-2'></i> Memuatkan data guru...</td></tr>`;
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          tbody.innerHTML = '';
+          if(data.length === 0) {
+            tbody.innerHTML = `<tr><td colspan='3' class='p-5 text-center text-slate-400'>Tiada rekod pengguna atau guru dikesan.</td></tr>`;
+            return;
+          }
+
+          data.forEach(g => {
+            let unitBadges = '';
+            if (g.unitKoko && g.unitKoko !== "Tiada Unit Ditugaskan") {
+              unitBadges = g.unitKoko.split(',').map(unit => {
+                let unitTrimmed = unit.trim();
+                return `<span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-indigo-100 shadow-sm mr-1.5 mb-1.5">${unitTrimmed}</span>`;
+              }).join('');
+            } else {
+              // Jika tiada unit ditugaskan
+              unitBadges = `<span class="inline-block bg-slate-100 text-slate-500 text-xs font-medium px-2.5 py-1 rounded-full italic">${g.unitKoko || 'Tiada Unit'}</span>`;
+            }
+            
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50 border-b border-slate-100 text-sm">
+                <td class="p-3 font-semibold text-slate-800">${g.nama}</td>
+                <td class="p-3 text-xs">
+                  <span class="bg-gray-100 text-gray-700 px-2.5 py-1 rounded font-medium">${g.peranan}</span>
+                </td>
+                <td class="p-3">
+                  <div class="flex flex-wrap items-center">
+                    ${unitBadges}
+                  </div>
+                </td>
+              </tr>
+            `;
+          });
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = `<tr><td colspan='3' class='p-5 text-center text-rose-500'>Sistem gagal memuatkan rekod data pengguna.</td></tr>`;
+        })
+        .ambilSenaraiGuru();
+    }
+
+    // --- SEKSYEN 6: PENGURUSAN UNIT MASTER (ADMIN) ---
+    function paparPengurusanKokoSection() {
+      google.script.run
+        .withSuccessHandler(function(guruList) {
+          const div = document.getElementById('guruPenasihatChecklist');
+          div.innerHTML = '';
+          guruList.forEach(g => {
+            div.innerHTML += `
+              <label class="flex items-center space-x-2">
+                <input type="checkbox" name="guruP" value="${g}" class="rounded text-blue-600">
+                <span>${g}</span>
+              </label>
+            `;
+          });
+        })
+        .getSenaraiGuru();
+
+      muatSenaraiKokoPengurusan();
+    }
+
+    function muatSenaraiKokoPengurusan() {
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(kokoList) {
+          toggleLoader(false);
+          allKokoUnits = kokoList;
+          const tbody = document.getElementById('tblPengurusanKoko');
+          tbody.innerHTML = '';
+
+          if(kokoList.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400">Tiada rekod kokurikulum berdaftar.</td></tr>`;
+            return;
+          }
+
+          kokoList.forEach(k => {
+            tbody.innerHTML += `
+              <tr class="hover:bg-slate-50 text-sm">
+                <td class="p-3 font-semibold text-slate-700">${k.Kategori}</td>
+                <td class="p-3 text-slate-800">${k.Nama_Unit}</td>
+                <td class="p-3 text-xs text-slate-500">${k.Guru_Penasihat}</td>
+                <td class="p-3 text-center">
+                  <button onclick="handlePadamKoko('${k.Nama_Unit}')" class="bg-red-50 hover:bg-red-100 text-red-600 px-2.5 py-1 rounded-lg text-xs font-semibold">
+                    <i class="fa-solid fa-trash"></i> Padam
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+        })
+        .getPengurusanKoko();
+    }
+
+    function handleSimpanKoko(e) {
+      e.preventDefault();
+      
+      const gList = [];
+      const checkedGurus = document.querySelectorAll('input[name="guruP"]:checked');
+      checkedGurus.forEach(g => gList.push(g.value));
+
+      if(gList.length === 0) {
+        showToast("Sila pilih sekurang-kurangnya SATU guru penasihat!", true);
+        return;
+      }
+
+      const kokoData = {
+        Kategori: document.getElementById('kokoKategori').value,
+        Nama_Unit: document.getElementById('kokoNama').value.trim(),
+        Guru_Penasihat: gList.join(', ')
+      };
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if(res.success) {
+            showToast(res.message);
+            document.getElementById('formKokoBaru').reset();
+            paparPengurusanKokoSection(); 
+          } else {
+            showToast(res.message, true);
+          }
+        })
+        .simpanPengurusanKoko(kokoData, userActive.ic, userActive.nama);
+    }
+
+    function handlePadamKoko(namaUnit) {
+      if(!confirm(`Adakah anda pasti untuk memadam unit "${namaUnit}"?`)) return;
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if(res.success) {
+            showToast(res.message);
+            muatSenaraiKokoPengurusan();
+          } else {
+            showToast(res.message, true);
+          }
+        })
+        .simpanPengurusanKoko(kokoData, userActive.ic, userActive.nama);
+    }
+
+    // --- SEKSYEN 7: REKOD PENCAPAIAN ---
+    function paparPencapaianSection() {
+      const tbody = document.getElementById('tblPencapaianBody');
+      if(!tbody) return;
+      
+      tbody.innerHTML = `<tr><td colspan='7' class='p-5 text-center text-slate-400'><i class='fa-solid fa-spinner animate-spin mr-2'></i> Memuatkan rekod pencapaian...</td></tr>`;
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          dataPencapaianSemasa = data || []; 
+          halamanPencapaianSemasa = 1; // Set semula ke muka surat 1 setiap kali segarkan data
+          filterPencapaian();
+        })
+        .withFailureHandler(function() {
+          tbody.innerHTML = `<tr><td colspan='7' class='p-5 text-center text-rose-500'>Gagal memuatkan rekod pencapaian.</td></tr>`;
+        })
+        .getPencapaian();
+    }
+
+    function resetPencapaianPage() {
+      pencapaianPage = 1;
+      filterPencapaian();
+    }
+
+    function filterPencapaian() {
+      let keyword = document.getElementById('cariPencapaianKeyword').value.toLowerCase().trim();
+      let bln = document.getElementById('filterBulan').value;
+      let kat = document.getElementById('filterKategoriPencapaian').value;
+      let per = document.getElementById('cariPencapaianPeringkat').value;
+      let guruPP = document.getElementById('cariGuruPP') ? document.getElementById('cariGuruPP').value.toLowerCase().trim() : '';
+
+      let f = dataPencapaianSemasa;
+
+      if(userActive.peranan === "Murid") {
+        const userIcClean = bersihkanIC(userActive.ic);
+        f = f.filter(p => {
+          if (!p.Ahli_Terlibat) return false;
+          let senaraiIcClean = p.Ahli_Terlibat.toString().split(',').map(ic => bersihkanIC(ic));
+          return senaraiIcClean.includes(userIcClean);
+        });
+      } else if (userActive.peranan === "Guru") {
+        f = f.filter(p => {
+          const pembimbing = p.Guru_Pembimbing ? p.Guru_Pembimbing.toString().trim() : "";
+          const pengiring = p.Guru_Pengiring ? p.Guru_Pengiring.toString().trim() : "";
+          return pembimbing.includes(userActive.nama) || pengiring.includes(userActive.nama);
+        });
+      }
+
+      if(per) f = f.filter(p => p.Peringkat === per);
+      if(kat) f = f.filter(p => p.Kategori === kat);
+      if(bln) f = f.filter(p => p.Tarikh && p.Tarikh.split('-')[1] === bln);
+      if(keyword) f = f.filter(p => p.Nama_Program.toLowerCase().includes(keyword));
+      if(guruPP) f = f.filter(p => {
+        const pembimbing = p.Guru_Pembimbing ? p.Guru_Pembimbing.toLowerCase() : "";
+        const pengiring = p.Guru_Pengiring ? p.Guru_Pengiring.toLowerCase() : "";
+        return pembimbing.includes(guruPP) || pengiring.includes(guruPP);
+      });
+
+      // --- KAWALAN PAGINATION (KEMAS KINI STATUS BUTTON) ---
+      let totalPages = Math.ceil(f.length / itemSatuMuka) || 1;
+      if(pencapaianPage < 1) pencapaianPage = 1;
+      if(pencapaianPage > totalPages) pencapaianPage = totalPages;
+
+      document.getElementById('pencapaianPageInfo').textContent = `Muka surat ${pencapaianPage} daripada ${totalPages} (${f.length} Rekod)`;
+      
+      // Hidupkan/Matikan butang secara fizikal mengikut kedudukan muka surat
+      const btnPrev = document.getElementById('btnPrevPencapaian');
+      const btnNext = document.getElementById('btnNextPencapaian');
+      if(btnPrev) btnPrev.disabled = (pencapaianPage === 1);
+      if(btnNext) btnNext.disabled = (pencapaianPage === totalPages);
+
+      let tb = document.getElementById('tblPencapaianBody');
+      tb.innerHTML = '';
+
+      let pageData = f.slice((pencapaianPage - 1) * itemSatuMuka, pencapaianPage * itemSatuMuka);
+      if(pageData.length === 0) {
+        tb.innerHTML = `<tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Tiada rekod ditemui.</td></tr>`;
+        return;
+      }
+
+      // --- JADUAL ASAL CIKGU (KEKAL 100%) ---
+      pageData.forEach(p => {
+        let ics = (p.Ahli_Terlibat || "").split(',').map(s=>bersihkanIC(s)).filter(s=>s);
+        let names = [];
+        let mCount = 0, cCount = 0, iCount = 0, lCount = 0;
+
+        ics.forEach(ic => {
+          let st = allMurids.find(x => bersihkanIC(x.No_IC) === ic);
+          if(st) {
+            names.push(`${st.Nama_Penuh} (${st.Kelas})`);
+            let k = st.Kaum ? st.Kaum.toUpperCase().trim() : "LAIN-LAIN";
+            if(k === "MELAYU") mCount++;
+            else if(k === "CINA") cCount++;
+            else if(k === "INDIA") iCount++;
+            else lCount++;
+          } else {
+            names.push(`IC: ${ic}`);
+            lCount++; 
+          }
+        });
+
+        let docs = '';
+        if(p.Link_Gambar) {
+          docs += `<a href="${p.Link_Gambar}" target="_blank" class="block text-[11px] text-indigo-600 hover:underline font-extrabold mb-1"><i class="fa-solid fa-image"></i> Gambar</a>`;
+        }
+        if(p.Link_Sijil) {
+          docs += `<a href="${p.Link_Sijil}" target="_blank" class="block text-[11px] text-emerald-600 hover:underline font-extrabold"><i class="fa-solid fa-file-pdf"></i> Sijil</a>`;
+        }
+        if(!docs) docs = '<span class="text-slate-300 italic text-[11px]">Tiada fail</span>';
+
+        let tind = '-';
+        if(userActive.peranan === 'Admin' || p.Diisi_Oleh === userActive.nama) {
+          tind = `
+            <div class="flex justify-center gap-1.5">
+              <button onclick="bukaModalPencapaian('${p.ID_Pencapaian}')" class="w-8 h-8 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl transition flex items-center justify-center shadow-sm">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button onclick="handlePadamPencapaian('${p.ID_Pencapaian}')" class="w-8 h-8 bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white rounded-xl transition flex items-center justify-center shadow-sm">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          `;
+        }
+
+        tb.innerHTML += `
+          <tr class="hover:bg-slate-50 transition border-b border-slate-100 text-xs">
+            <td class="p-4">
+              <div class="font-extrabold text-slate-800 text-sm">${p.Nama_Program}</div>
+              <div class="text-[10px] text-slate-400 mt-1 uppercase font-bold tracking-wider">${p.Kategori} | Tarikh: ${p.Tarikh}</div>
+              <div class="text-[9px] text-slate-400 font-semibold uppercase mt-0.5">Anjuran: ${p.Penganjur} (${p.Badan_Penganjur || 'KPM'})</div>
+            </td>
+            <td class="p-4 font-bold text-indigo-700">
+              ${p.Peringkat}
+              <div class="text-[10px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded font-black inline-block mt-1 uppercase shadow-sm">${p.Pencapaian}</div>
+            </td>
+            <td class="p-4">
+              <div class="max-h-24 overflow-y-auto leading-relaxed text-[10px] text-slate-600 space-y-0.5 font-bold">${names.join('<br>')}</div>
+            </td>
+            <!-- LAJUR BAHARU: MENUNJUKKAN GURU PEMBIMBING & GURU PENGIRING DENGAN JELAS -->
+            <td class="p-4 font-semibold text-slate-600 space-y-1">
+              <div><span class="text-[9px] text-slate-400 font-bold uppercase block">Pembimbing:</span> ${p.Guru_Pembimbing || '-'}</div>
+              <div class="mt-1"><span class="text-[9px] text-indigo-400 font-bold uppercase block">Pengiring:</span> ${p.Guru_Pengiring || '-'}</div>
+            </td>
+            <td class="p-4 leading-tight font-bold text-[10px] text-slate-500 bg-slate-50/50">
+              MELAYU: ${mCount}<br>
+              CINA: ${cCount}<br>
+              INDIA: ${iCount}<br>
+              LAIN-LAIN: ${lCount}
+            </td>
+            <td class="p-4 text-center font-bold">${docs}</td>
+            <td class="p-4 text-center actions-col">${tind}</td>
+          </tr>
+        `;
+      });
+
+      document.querySelectorAll('.actions-col').forEach(c => c.classList.toggle('hidden', userActive.peranan === "Murid"));
+    }
+
+    // Fungsi apabila butang "Sebelumnya" ditekan
+    function pencapaianHalamanSebelumnya() {
+      if (pencapaianPage > 1) {
+        pencapaianPage--;
+        filterPencapaian(); // Jalankan semula filter untuk muka surat baharu
+      }
+    }
+
+    // Fungsi apabila butang "Seterusnya" ditekan
+    function pencapaianHalamanSeterusnya() {
+      // Kira total data ditapis semasa untuk hadkan pergerakan maksimum
+      let keyword = document.getElementById('cariPencapaianKeyword').value.toLowerCase().trim();
+      let bln = document.getElementById('filterBulan').value;
+      let kat = document.getElementById('filterKategoriPencapaian').value;
+      let per = document.getElementById('cariPencapaianPeringkat').value;
+      let guruFilter = document.getElementById('cariGuruPP').value.toLowerCase().trim();
+      
+      let f = dataPencapaianSemasa;
+      if(userActive.peranan === "Murid") {
+        const userIcClean = bersihkanIC(userActive.ic);
+        f = f.filter(p => p.Ahli_Terlibat && p.Ahli_Terlibat.toString().split(',').map(ic => bersihkanIC(ic)).includes(userIcClean));
+      } else if (userActive.peranan === "Guru") {
+        f = f.filter(p => (p.Guru_Pembimbing || "").toString().includes(userActive.nama) || (p.Guru_Pengiring || "").toString().includes(userActive.nama));
+      }
+      if(per) f = f.filter(p => p.Peringkat === per);
+      if(kat) f = f.filter(p => p.Kategori === kat);
+      if(bln) f = f.filter(p => p.Tarikh && p.Tarikh.split('-')[1] === bln);
+      if(keyword) f = f.filter(p => p.Nama_Program.toLowerCase().includes(keyword));
+      if(guruFilter) f = f.filter(p => (p.Guru_Pembimbing || "").toLowerCase().includes(guruFilter) || (p.Guru_Pengiring || "").toLowerCase().includes(guruFilter));
+
+      let totalPages = Math.ceil(f.length / itemSatuMuka) || 1;
+
+      if (pencapaianPage < totalPages) {
+        pencapaianPage++;
+        filterPencapaian(); // Jalankan semula filter untuk muka surat baharu
+      }
+    }
+
+    // --- PRA-TONTON IC BERGERAK LANGSUNG (LIVE IC PREVIEW) ---
+    function updateLiveICPreview() {
+      const textarea = document.getElementById('pPesertaList');
+      const container = document.getElementById('icPreviewContainer');
+      if (!textarea || !container) return;
+
+      const rawInput = textarea.value;
+      if (!rawInput.trim()) {
+        container.innerHTML = "Sila masukkan No. IC untuk melihat pra-tonton nama.";
+        return;
+      }
+
+      const senaraiIc = rawInput.split(',').map(ic => bersihkanIC(ic)).filter(ic => ic);
+      let outputHTML = `<div class="font-bold border-b pb-1 mb-1.5 text-indigo-950">Nama Ahli Dikesan (${senaraiIc.length}):</div><ul class="space-y-1 list-decimal list-inside">`;
+
+      senaraiIc.forEach(ic => {
+        let m = allMurids.find(x => bersihkanIC(x.No_IC) === ic);
+        if (m) {
+          outputHTML += `<li><span class="text-indigo-800 font-extrabold">${m.Nama_Penuh}</span> <span class="text-slate-400 text-[10px]">(${m.Kelas})</span></li>`;
+        } else {
+          outputHTML += `<li><span class="text-rose-600">IC: ${ic} (Murid Tiada dalam Data)</span></li>`;
+        }
+      });
+
+      outputHTML += "</ul>";
+      container.innerHTML = outputHTML;
+    }
+
+    function bukaModalPencapaian(id='') {
+      document.getElementById('formPencapaian').reset();
+      document.getElementById('icPreviewContainer').innerHTML = 'Sila masukkan No. IC untuk melihat pra-tonton nama.';
+      document.getElementById('pId').value = '';
+      document.getElementById('modalPencapaianTitle').textContent = "Isi Rekod Pencapaian & Program Murid";
+
+      google.script.run
+        .withSuccessHandler(function(guruList) {
+          let gp1 = document.getElementById('pilihGuruPembimbingList');
+          let gp2 = document.getElementById('pilihGuruPengiringList');
+          gp1.innerHTML = gp2.innerHTML = '';
+
+          (guruList || []).forEach(g => {
+            gp1.innerHTML += `<label class="flex items-center space-x-2"><input type="checkbox" name="guruPem" value="${g}" class="rounded text-indigo-600"><span>${g}</span></label>`;
+            gp2.innerHTML += `<label class="flex items-center space-x-2"><input type="checkbox" name="guruPen" value="${g}" class="rounded text-emerald-600"><span>${g}</span></label>`;
+          });
+
+          if(id) {
+            let p = dataPencapaianSemasa.find(x => x.ID_Pencapaian === id);
+            if(p) {
+              document.getElementById('modalPencapaianTitle').textContent = "Kemaskini Rekod Pencapaian";
+              document.getElementById('pId').value = p.ID_Pencapaian;
+              document.getElementById('pNamaProg').value = p.Nama_Program;
+              document.getElementById('pTarikh').value = p.Tarikh;
+              document.getElementById('pPenganjur').value = p.Penganjur;
+              document.getElementById('pBadanPenganjur').value = p.Badan_Penganjur || "KPM";
+              document.getElementById('pTempat').value = p.Tempat;
+              document.getElementById('pPeringkat').value = p.Peringkat;
+              document.getElementById('pKedudukan').value = p.Pencapaian;
+              document.getElementById('pKategori').value = p.Kategori;
+              document.getElementById('pCatatanKeputusan').value = p.Catatan_Keputusan;
+              document.getElementById('pPesertaList').value = p.Ahli_Terlibat || '';
+              document.getElementById('pLinkGambar').value = p.Link_Gambar;
+              document.getElementById('pLinkSijil').value = p.Link_Sijil;
+
+              document.querySelectorAll('input[name="guruPem"]').forEach(c => {
+                if((p.Guru_Pembimbing || '').includes(c.value)) c.checked = true;
+              });
+              document.querySelectorAll('input[name="guruPen"]').forEach(c => {
+                if((p.Guru_Pengiring || '').includes(c.value)) c.checked = true;
+              });
+
+              updateLiveICPreview();
+            }
+          }
+        })
+        .getSenaraiGuru();
+
+      document.getElementById('modalPencapaian').classList.remove('hidden');
+    }
+
+    function closeModalPencapaian() {
+      document.getElementById('modalPencapaian').classList.add('hidden');
+    }
+
+    function handleSimpanPencapaian(e) {
+      e.preventDefault();
+
+      let p1 = [];
+      let p2 = [];
+      document.querySelectorAll('input[name="guruPem"]:checked').forEach(c => p1.push(c.value));
+      document.querySelectorAll('input[name="guruPen"]:checked').forEach(c => p2.push(c.value));
+
+      if(p1.length === 0) {
+        showToast("Sila pilih sekurang-kurangnya SATU guru pembimbing!", true);
+        return;
+      }
+
+      let d = {
+        ID_Pencapaian: document.getElementById('pId').value,
+        Nama_Program: document.getElementById('pNamaProg').value.toUpperCase(),
+        Tarikh: document.getElementById('pTarikh').value,
+        Penganjur: document.getElementById('pPenganjur').value,
+        Badan_Penganjur: document.getElementById('pBadanPenganjur').value,
+        Tempat: document.getElementById('pTempat').value,
+        Peringkat: document.getElementById('pPeringkat').value,
+        Pencapaian: document.getElementById('pKedudukan').value,
+        Kategori: document.getElementById('pKategori').value,
+        Catatan_Keputusan: document.getElementById('pCatatanKeputusan').value,
+        Ahli_Terlibat: document.getElementById('pPesertaList').value.trim(),
+        Guru_Pembimbing: p1.join(', '),
+        Guru_Pengiring: p2.join(', '),
+        Link_Gambar: document.getElementById('pLinkGambar').value.trim(),
+        Link_Sijil: document.getElementById('pLinkSijil').value.trim(),
+        Diisi_Oleh: userActive.nama
+      };
+
+      // 1. Hide modal immediately so the user feels the action was taken
+      closeModalPencapaian(); 
+
+      // 2. Launch the loader
+      toggleLoader(true);
+
+      google.script.run
+        .withSuccessHandler(function(r) {
+          toggleLoader(false);
+          if(r && r.success) {
+            showToast(r.message);
+            closeModalPencapaian();
+            google.script.run.withSuccessHandler(data => {
+              dataPencapaianSemasa = data.filter(p => p.ID_Pencapaian && p.ID_Pencapaian.trim() !== "");
+              filterPencapaian();
+            }).getPencapaian();
+          } else {
+            showToast(r ? r.message : "Gagal menyimpan pencapaian.", true);
+          }
+        })
+        .withFailureHandler(function(error) {
+          toggleLoader(false);
+          showToast("Ralat menyimpan data pencapaian: " + error.message, true);
+        })
+        .simpanPencapaian(d, userActive.ic, userActive.nama);
+    }
+
+    function handlePadamPencapaian(id) {
+      if(!confirm("Adakah anda pasti ingin memadam rekod pencapaian ini?")) return;
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if(res && res.success) {
+            showToast(res.message);
+            paparPencapaianSection();
+          } else {
+            showToast(res ? res.message : "Gagal memadam.", true);
+          }
+        })
+        .withFailureHandler(function(error) {
+          toggleLoader(false);
+          showToast("Ralat memadam pencapaian: " + error.message, true);
+        })
+        .padamPencapaian(id, userActive.ic, userActive.nama);
+    }
+
+    // UPDATE MASTER KOKURIKULUM DROPDOWNS
+    function updateDropdownsKokoMurid() {
+      let u = document.getElementById('mSelUniform');
+      let k = document.getElementById('mSelKelab');
+      let s = document.getElementById('mSelSukan');
+      let r = document.getElementById('mSelRumah');
+
+      u.innerHTML = k.innerHTML = s.innerHTML = r.innerHTML = '<option value="">- TIADA -</option>';
+      allKokoUnits.forEach(x => {
+        let o = `<option value="${x.Nama_Unit}">${x.Nama_Unit}</option>`;
+        if(x.Kategori === "Unit Uniform") u.innerHTML += o;
+        else if(x.Kategori === "Kelab Persatuan") k.innerHTML += o;
+        else if(x.Kategori === "Sukan Permainan") s.innerHTML += o;
+        else r.innerHTML += o;
+      });
+    }
+
+    // PROFILE KEMASKINI CONTROLLER
+    function openProfileModal() {
+      document.getElementById('modalProfil').classList.remove('hidden');
+    }
+    function closeProfileModal() {
+      document.getElementById('modalProfil').classList.add('hidden');
+    }
+    function handleUpdateProfil(e) {
+      e.preventDefault();
+      let pass = document.getElementById('profPass').value, conf = document.getElementById('profPassConfirm').value, f = document.getElementById('picInput');
+      if(pass && pass !== conf) {
+        showToast("Pengesahan kata laluan tidak sepadan!", true); return;
+      }
+      toggleLoader(true);
+      if(f.files.length > 0) {
+        let r = new FileReader();
+        r.onload = e => {
+          let img = new Image();
+          img.onload = () => {
+            let c = document.createElement('canvas'); c.width = 150; c.height = 150;
+            c.getContext('2d').drawImage(img, 0, 0, 150, 150);
+            hantarUpdateProfil(pass, c.toDataURL('image/jpeg', 0.7));
+          };
+          img.src = e.target.result;
+        };
+        r.readAsDataURL(f.files[0]);
+      } else hantarUpdateProfil(pass, null);
+    }
+    function hantarUpdateProfil(p, i) {
+      google.script.run.withSuccessHandler(res => {
+        toggleLoader(false);
+        if(res.success) {
+          showToast("Profil berjaya dikemas kini!");
+          closeProfileModal();
+          if(i) document.getElementById('sidePic').src = i;
+        }
+      }).updateProfile(userActive.ic, userActive.nama, p, i);
+    }
+
+    // MODAL DAFTAR MURID (ADMIN)
+    function bukaModalMurid(ic = '') {
+      document.getElementById('formMurid').reset(); document.getElementById('mIc').disabled = false;
+      document.getElementById('modalMuridTitle').textContent = "Pendaftaran Murid Baharu";
+      if(ic) {
+        let m = allMurids.find(x => bersihkanIC(x.No_IC) === bersihkanIC(ic));
+        if(m) {
+          document.getElementById('modalMuridTitle').textContent = "Edit Murid: " + m.Nama_Penuh;
+          document.getElementById('mNama').value = m.Nama_Penuh;
+          document.getElementById('mIc').value = m.No_IC;
+          document.getElementById('mIc').disabled = true;
+          document.getElementById('mKelas').value = m.Kelas;
+          document.getElementById('mKaum').value = m.Kaum;
+          document.getElementById('mAgama').value = m.Agama;
+          document.getElementById('mTel1').value = m.No_Tel_Penjaga_1;
+          document.getElementById('mTel2').value = m.No_Tel_Penjaga_2;
+          document.getElementById('mSelUniform').value = m.Unit_Uniform;
+          document.getElementById('mSelKelab').value = m.Kelab_Persatuan;
+          document.getElementById('mSelSukan').value = m.Sukan_Permainan;
+          document.getElementById('mSelRumah').value = m.Rumah_Sukan;
+        }
+      }
+      document.getElementById('modalMurid').classList.remove('hidden');
+    }
+    
+    function closeModalMurid() {
+      document.getElementById('modalMurid').classList.add('hidden');
+    }
+    
+    function handleSimpanMurid(e) {
+      e.preventDefault();
+      let d = {
+        Nama_Penuh: document.getElementById('mNama').value.toUpperCase(),
+        No_IC: document.getElementById('mIc').value.trim(),
+        Kelas: document.getElementById('mKelas').value,
+        Kaum: document.getElementById('mKaum').value,
+        Agama: document.getElementById('mAgama').value,
+        No_Tel_Penjaga_1: document.getElementById('mTel1').value,
+        No_Tel_Penjaga_2: document.getElementById('mTel2').value,
+        Unit_Uniform: document.getElementById('mSelUniform').value,
+        Kelab_Persatuan: document.getElementById('mSelKelab').value,
+        Sukan_Permainan: document.getElementById('mSelSukan').value,
+        Rumah_Sukan: document.getElementById('mSelRumah').value
+      };
+      toggleLoader(true);
+      google.script.run.withSuccessHandler(r => {
+        toggleLoader(false);
+        if(r.success) {
+          showToast(r.message);
+          closeModalMurid();
+          muatSemuaDataMula();
+        }
+      }).simpanMaklumatMurid(d, userActive.ic, userActive.nama);
+    }
+  </script>
+</body>
+</html>
 </body>
 </html>
