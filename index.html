@@ -1131,39 +1131,27 @@
     }
 
     // LOG MASUK BERJAYA DENGAN PENYIMPANAN SESI
-    function handleLogin(e) {
-      e.preventDefault();
-      const ic = document.getElementById('loginIc').value.trim();
-      const pass = document.getElementById('loginPass').value.trim();
-      const alertBox = document.getElementById('loginAlert');
-      const btn = document.getElementById('btnLogin');
+    function handleLogin(event) {
+      event.preventDefault();
+      let username = document.getElementById("username").value;
+      let password = document.getElementById("password").value;
 
-      alertBox.classList.add('hidden');
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-circle-notch animate-spin"></i> Sila tunggu...';
-
-      google.script.run
-        .withSuccessHandler(function(res) {
-          btn.disabled = false;
-          btn.innerHTML = 'MASUK PORTAL <i class="fa-solid fa-right-to-bracket ml-1.5"></i>';
-          
-          if(res.success) {
-            userActive = res;
-            // Simpan sesi ke sessionStorage
-            sessionStorage.setItem('userActive', JSON.stringify(res));
-            paparPortalUtama();
+      const API = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
+      fetch(API + "?username=" + username + "&password=" + password)
+        .then(res => res.json())
+        .then(data => {
+    
+          if (data.status === "OK") {
+            alert("Login success! Role: " + data.role);
           } else {
-            alertBox.textContent = res.message;
-            alertBox.classList.remove('hidden');
+            alert("Login failed");
           }
+    
         })
-        .withFailureHandler(function(err) {
-          btn.disabled = false;
-          btn.innerHTML = 'MASUK PORTAL';
-          alertBox.textContent = "Gagal menghubungi pelayan Google Sheets: " + err.message;
-          alertBox.classList.remove('hidden');
-        })
-        .loginUser(ic, pass);
+        .catch(err => {
+          alert("Server error");
+          console.log(err);
+        });
     }
 
     function paparPortalUtama() {
@@ -1185,6 +1173,7 @@
     function handleLogout() {
       if (typeof toggleLoader === 'function') toggleLoader(true);
 
+      fetch(API_URL + "
       google.script.run
         .withSuccessHandler(function() {
           prosesLogKeluarBersih();
