@@ -12,13 +12,18 @@
 <p id="output">Loading...</p>
 <script>
 const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
+function handleResponse(data) {
+  document.getElementById("output").innerText =
+    data.message || "No message";
+}
 function loadData() {
   const script = document.createElement("script");
   script.src = API_URL + "?callback=handleResponse";
+  script.onerror = function () {
+    document.getElementById("output").innerText =
+      "Failed to load API";
+  };
   document.body.appendChild(script);
-}
-function handleResponse(data) {
-  document.getElementById("output").innerText = data.message;
 }
 window.onload = loadData;
 </script>
