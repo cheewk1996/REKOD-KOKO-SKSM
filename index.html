@@ -991,8 +991,9 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
     function handleResponse(data) {
       document.getElementById("output").innerText =
-        data.message || "No message";
+        data.message;
     }
+    
     function loadData() {
       const script = document.createElement("script");
       script.src = API_URL + "?callback=handleResponse";
