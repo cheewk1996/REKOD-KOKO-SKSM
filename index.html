@@ -11,14 +11,16 @@
 <h1>My School Web App</h1>
 <p id="output">Loading...</p>
 <script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxI90Zj8HbO7GQKkSFMpB3Zf2087zx9_C778OQfjmwv-gexYgpICb_62n0VpnV46qFi/exec";
-window.onload = function () {
-  fetch(API_URL)
-    .then(res => res.text())
-    .then(data => {
-      document.getElementById("output").innerText = data;
-    });
-};
+const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
+function loadData() {
+  const script = document.createElement("script");
+  script.src = API_URL + "?callback=handleResponse";
+  document.body.appendChild(script);
+}
+function handleResponse(data) {
+  document.getElementById("output").innerText = data.message;
+}
+window.onload = loadData;
 </script>
 </body>
 </html>
