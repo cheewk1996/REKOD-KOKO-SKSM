@@ -104,7 +104,7 @@
   <!-- ================= PORTAL UTAMA ================= -->
   <div id="appPortal" class="hidden min-h-screen flex flex-col md:flex-row">
     
-    <!-- MENU SEBELAH KIRI (SIDEBAR) -->
+    <!-- MENU SEBELAH KIRI (SIDEBAR) & MENU ATAS (MOBILE) -->
     <aside id="sidebar" class="bg-slate-900 text-slate-300 w-full md:w-64 min-h-0 md:min-h-screen flex flex-col justify-between transition-all duration-300 relative z-20 shadow-xl">
       <div id="sidebarGroup" class="w-full md:w-64 transition-all duration-300">
         
@@ -485,7 +485,7 @@
         </div>
       </section>
 
-      <!-- ================= 4D. SEKSYEN PERJUMPAAN (BAHARU) ================= -->
+      <!-- ================= 4D. SEKSYEN PERJUMPAAN ================= -->
       <section id="sectionPerjumpaan" class="section-view hidden space-y-6">
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center space-x-3 w-full sm:w-auto">
@@ -601,7 +601,7 @@
         </div>
       </section>
 
-      <!-- 6. PENCAPAIAN (PAGINATION + STATS + LIVE IC) -->
+      <!-- 6. PENCAPAIAN -->
       <section id="sectionPencapaian" class="section-view hidden space-y-6">
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col lg:flex-row gap-4 items-center justify-between">
           <div class="flex flex-wrap gap-2.5 w-full lg:w-auto items-center">
@@ -635,7 +635,7 @@
           <p class="text-xs text-amber-800 font-bold uppercase tracking-wider"><i class="fa-solid fa-circle-info mr-2"></i>Sila hantar sijil fizikal/digital luar sekolah kepada guru pembimbing anda.</p>
         </div>
 
-        <!-- Jadual Pencapaian (Pagination, Statistik Kaum, Dokumen) -->
+        <!-- Jadual Pencapaian -->
         <div class="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-left border-collapse">
@@ -776,76 +776,76 @@
     <div class="bg-white rounded-3xl w-full max-w-2xl p-6 shadow-2xl overflow-hidden">
       <h2 id="modalPerjumpaanTitle" class="text-xl font-bold text-slate-800 mb-4">Isi Laporan Perjumpaan</h2>
       
-    <form id="formPerjumpaan">
-      <input type="hidden" id="prmId" name="prmId">
-      
-      <div class="space-y-4">
+      <form id="formPerjumpaan">
+        <input type="hidden" id="prmId" name="prmId">
         
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-semibold text-slate-600 mb-1">Unit Koko</label>
-            <select id="prmUnitKoko" name="prmUnitKoko" required class="w-full p-3 border rounded-xl"></select>
+        <div class="space-y-4">
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Unit Koko</label>
+              <select id="prmUnitKoko" name="prmUnitKoko" required class="w-full p-3 border rounded-xl"></select>
+            </div>
+              
+            <div>
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Bilangan Perjumpaan</label>
+              <input type="number" id="prmBil" min="1" max="12" required placeholder="1 - 12" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
           </div>
-            
+
           <div>
-            <label class="block text-sm font-semibold text-slate-600 mb-1">Bilangan Perjumpaan</label>
-            <input type="prmBil" id="prmBil" min="1" max="12" required placeholder="1 - 12" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Tarikh</label>
+            <input type="date" id="prmTarikh" name="prmTarikh" required class="w-full p-3 border rounded-xl">
           </div>
-        </div>
 
-        <div>
-          <label class="block text-sm font-semibold text-slate-600 mb-1">Tarikh</label>
-          <input type="date" id="prmTarikh" name="prmTarikh" required class="w-full p-3 border rounded-xl">
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-600 mb-1">Tajuk</label>
-          <input type="text" id="prmTajuk" name="prmTajuk" required class="w-full p-3 border rounded-xl">
-        </div>
-
-        <div>
-          <label class="block text-sm font-semibold text-slate-600 mb-1">Keterangan</label>
-          <textarea id="prmKeterangan" name="prmKeterangan" class="w-full p-3 border rounded-xl"></textarea>
-        </div>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 1</label>
-            <input type="file" id="prmFile1" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
-            <input type="hidden" id="prmImg1" name="prmImg1">
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Tajuk</label>
+            <input type="text" id="prmTajuk" name="prmTajuk" required class="w-full p-3 border rounded-xl">
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1">Keterangan</label>
+            <textarea id="prmKeterangan" name="prmKeterangan" class="w-full p-3 border rounded-xl"></textarea>
           </div>
           
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 2</label>
-            <input type="file" id="prmFile2" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
-            <input type="hidden" id="prmImg2" name="prmImg2">
-          </div>
-          
-          <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 3</label>
-            <input type="file" id="prmFile3" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
-            <input type="hidden" id="prmImg3" name="prmImg3">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guru Pembimbing (Boleh Tick)</label>
-          <div id="prmGuruChecklist" class="p-3 border border-slate-200 rounded-2xl h-24 overflow-y-auto space-y-1.5 bg-slate-50 text-[12px] font-bold"></div>
-        </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 1</label>
+              <input type="file" id="prmFile1" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+              <input type="hidden" id="prmImg1" name="prmImg1">
+            </div>
             
-          <div>
-            <label class="block text-sm font-semibold text-slate-600 mb-1">Catatan</label>
-            <textarea id="prmCatatan" name="prmCatatan" class="w-full p-3 border rounded-xl"></textarea>
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 2</label>
+              <input type="file" id="prmFile2" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+              <input type="hidden" id="prmImg2" name="prmImg2">
+            </div>
+            
+            <div>
+              <label class="block text-xs font-bold text-slate-500 uppercase">Muat Naik Gambar 3</label>
+              <input type="file" id="prmFile3" accept="image/png, image/jpeg, image/jpg, image/heic, image/heif" class="w-full p-2 border rounded-lg text-sm bg-white">
+              <input type="hidden" id="prmImg3" name="prmImg3">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Guru Pembimbing (Boleh Tick)</label>
+              <div id="prmGuruChecklist" class="p-3 border border-slate-200 rounded-2xl h-24 overflow-y-auto space-y-1.5 bg-slate-50 text-[12px] font-bold"></div>
+            </div>
+              
+            <div>
+              <label class="block text-sm font-semibold text-slate-600 mb-1">Catatan</label>
+              <textarea id="prmCatatan" name="prmCatatan" class="w-full p-3 border rounded-xl"></textarea>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div class="flex justify-end gap-3 mt-6">
-        <button type="button" onclick="document.getElementById('modalPerjumpaan').classList.add('hidden')" class="px-4 py-2 text-slate-600 font-bold">Batal</button>
-        <button type="button" onclick="simpanDataPerjumpaan()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">Simpan</button>
-      </div>
-    </form>
+        <div class="flex justify-end gap-3 mt-6">
+          <button type="button" onclick="document.getElementById('modalPerjumpaan').classList.add('hidden')" class="px-4 py-2 text-slate-600 font-bold">Batal</button>
+          <button type="button" onclick="simpanDataPerjumpaan()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold">Simpan</button>
+        </div>
+      </form>
       
     </div>
   </div>
@@ -954,10 +954,92 @@
 
   <!-- ======================== SISTEM LOGIK JAVASCRIPT ======================== -->
   <script>
-    // Letakkan di bahagian atas skrip HTML (Global Variables)
-    let dataPencapaianSemasa = []; // Menyimpan semua data dari server
-    let halamanPencapaianSemasa = 1; // Halaman aktif
-    const rekodSetiapHalaman = 10; // Tetapan 10 senarai setiap muka surat
+    const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
+
+    // =========================================================================
+    // POLYFILL EMULATOR PINTAR UNTUK MENGGANTIKAN google.script.run SECARA GLOBAL
+    // =========================================================================
+    const google = {
+      script: {
+        run: (function() {
+          class GASRunBuilder {
+            constructor(successFn = null, failureFn = null) {
+              this.successFn = successFn;
+              this.failureFn = failureFn;
+              
+              // Daftarkan semua kaedah/fungsi yang ada di Code.gs
+              const methods = [
+                "logKeluarSistem", "dapatkanInfoMuridLengkap", "getAktivitiKoko",
+                "getMaklumatMurid", "getKehadiranAhli", "simpanKehadiranAhli",
+                "simpanDataPerjumpaanBackend", "simpanAktivitiKoko", "padamAktivitiKoko",
+                "ambilSenaraiGuru", "getSenaraiGuru", "getPengurusanKoko",
+                "simpanPengurusanKoko", "getPencapaian", "simpanPencapaian",
+                "padamPencapaian", "updateProfile", "simpanMaklumatMurid",
+                "getDashboardData", "getSemuaKehadiranAdmin", "uploadImageToDrive"
+              ];
+              
+              methods.forEach(method => {
+                this[method] = (...args) => {
+                  this._execute(method, args);
+                };
+              });
+            }
+            
+            withSuccessHandler(callback) {
+              return new GASRunBuilder(callback, this.failureFn);
+            }
+            
+            withFailureHandler(callback) {
+              return new GASRunBuilder(this.successFn, callback);
+            }
+            
+            async _execute(methodName, args) {
+              try {
+                // Menggunakan POST dengan text/plain bagi memintas sepenuhnya sekatan CORS preflight OPTIONS
+                const response = await fetch(API_URL, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'text/plain;charset=utf-8'
+                  },
+                  body: JSON.stringify({
+                    action: methodName,
+                    arguments: args
+                  })
+                });
+                
+                if (!response.ok) {
+                  throw new Error(`Ralat Rangkaian HTTP: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result && result.success === false) {
+                  throw new Error(result.message || "Ralat tidak dikenali di Backend");
+                }
+
+                if (this.successFn) {
+                  this.successFn(result);
+                }
+              } catch (error) {
+                console.error(`Gagal berkomunikasi dengan GAS [Method: ${methodName}]:`, error);
+                if (this.failureFn) {
+                  this.failureFn(error);
+                } else {
+                  showToast(`Ralat Sistem: ${error.message}`, true);
+                }
+              }
+            }
+          }
+          
+          return new GASRunBuilder();
+        })()
+      }
+    };
+
+    // Global variables
+    let dataPencapaianSemasa = []; 
+    let halamanPencapaianSemasa = 1; 
+    const rekodSetiapHalaman = 10; 
     
     function bersihkanIC(ic) {
       if (!ic) return "";
@@ -973,7 +1055,7 @@
     let allMurids = [];
     let allKokoUnits = [];
     let allPencapaian = [];
-    let allAktivitiKoko = []; // Memulakan pembolehubah laporan perjumpaan kokurikulum secara global
+    let allAktivitiKoko = []; 
     let chartsObj = {};
     
     // State Kehadiran & Jawatan
@@ -987,36 +1069,18 @@
     let pencapaianPage = 1;
     const itemSatuMuka = 10;
 
-    // PEMULA SISTEM - KEKALKAN SESI LOG MASUK (PERSISTENT SESSION)
-    const API_URL = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
-    function handleResponse(data) {
-      document.getElementById("output").innerText =
-        data.message;
-    }
-    function loadData() {
-      const script = document.createElement("script");
-      script.src = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec?callback=handleResponse";
-      script.onerror = function () {
-        document.getElementById("output").innerText =
-          "❌ API NOT LOADING (check Apps Script deploy)";
-      };
-      document.body.appendChild(script);
-    }
-    window.onload = loadData;
     window.onload = function() {
       var dataSesi = sessionStorage.getItem('userActive');
       
-      // HAD KESELAMATAN: Jika tiada sesi aktif, paksa sistem kekal di login page dan JANGAN teruskan kod portal
       if (!dataSesi) {
         document.getElementById('loginPage').classList.remove('hidden');
         document.getElementById('appPortal').classList.add('hidden');
         
-        // Hilangkan kelipan permulaan pada loginPage
         const loginPage = document.getElementById('loginPage');
         loginPage.classList.remove('animasi-awal');
         const loginCard = loginPage.querySelector('.bg-white\\/95');
         if(loginCard) loginCard.classList.remove('animasi-awal');
-        return; // <--- SEKAT DI SINI supaya skrip bawah tidak berjalan dan tidak 'crash' putih
+        return; 
       } else {
         userActive = JSON.parse(dataSesi);
         paparPortalUtama();
@@ -1071,21 +1135,16 @@
       const sidebarGroup = document.getElementById('sidebarGroup');
       const txts = document.querySelectorAll('.sidebar-text');
 
-      // Periksa sama ada sidebar sedang mengecil (collapsed) atau tidak
       if (sidebar.classList.contains('md:w-64')) {
-        // 1. KECILKAN SIDEBAR (Hanya ikon kelihatan)
         sidebar.classList.remove('md:w-64');
-        sidebar.classList.add('md:w-20'); // Ditukar ke lebar saiz bar ikon yang kecil
+        sidebar.classList.add('md:w-20'); 
         
         if (sidebarGroup) {
           sidebarGroup.classList.remove('md:w-64');
           sidebarGroup.classList.add('md:w-20');
         }
-
-        // Sembunyikan semua elemen teks
         txts.forEach(t => t.classList.add('hidden'));
       } else {
-        // 2. BESARKAN SEMULA SIDEBAR
         sidebar.classList.remove('md:w-20');
         sidebar.classList.add('md:w-64');
         
@@ -1093,33 +1152,26 @@
           sidebarGroup.classList.remove('md:w-20');
           sidebarGroup.classList.add('md:w-64');
         }
-
-        // Paparkan semula semua elemen teks
         txts.forEach(t => t.classList.remove('hidden'));
       }
     }
 
-    // Fungsi untuk membuka dan menutup menu atas pada paparan smartphone
     function toggleMobileMenu() {
       const menuContent = document.getElementById('menuContent');
       const menuIcon = document.getElementById('mobileMenuIcon');
       
       if (menuContent.classList.contains('hidden')) {
         menuContent.classList.remove('hidden');
-        // Tukar ikon kepada tanda pangkah (X) apabila menu dibuka
         menuIcon.classList.remove('fa-bars');
         menuIcon.classList.add('fa-xmark');
       } else {
         menuContent.classList.add('hidden');
-        // Tukar semula kepada ikon bar三 apabila menu ditutup
         menuIcon.classList.remove('fa-xmark');
         menuIcon.classList.add('fa-bars');
       }
     }
 
-    // Fungsi pembantu untuk menutup semula menu dropdown secara automatik selepas user memilih seksyen
     function tutupMenuMobileSelepasKlik() {
-      // Hanya jalankan fungsi ini jika skrip dikesan dibuka pada paparan skrin mudah alih (bawah takat md:768px)
       if (window.innerWidth < 768) {
         const menuContent = document.getElementById('menuContent');
         const menuIcon = document.getElementById('mobileMenuIcon');
@@ -1130,28 +1182,47 @@
       }
     }
 
-    // LOG MASUK BERJAYA DENGAN PENYIMPANAN SESI
+    // MEMPERBAIKI KESILAPAN PEMBOLEHUBAH LOG MASUK GURU/MURID SECARA FETCH POST
     function handleLogin(event) {
       event.preventDefault();
-      let username = document.getElementById("username").value;
-      let password = document.getElementById("password").value;
+      const ic = document.getElementById("loginIc").value.trim();
+      const pass = document.getElementById("loginPass").value;
 
-      const API = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec";
-      fetch(API + "?username=" + username + "&password=" + password)
-        .then(res => res.json())
-        .then(data => {
-    
-          if (data.status === "OK") {
-            alert("Login success! Role: " + data.role);
-          } else {
-            alert("Login failed");
-          }
-    
+      toggleLoader(true);
+      
+      fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify({
+          action: 'logMasuk',
+          arguments: [ic, pass]
         })
-        .catch(err => {
-          alert("Server error");
-          console.log(err);
-        });
+      })
+      .then(res => res.json())
+      .then(data => {
+        toggleLoader(false);
+        if (data && data.success) {
+          userActive = {
+            ic: data.ic,
+            nama: data.nama,
+            peranan: data.peranan,
+            gambar: data.gambar
+          };
+          sessionStorage.setItem('userActive', JSON.stringify(userActive));
+          paparPortalUtama();
+        } else {
+          const alertBox = document.getElementById('loginAlert');
+          alertBox.textContent = data.message || "No. IC atau Kata Laluan salah.";
+          alertBox.classList.remove('hidden');
+        }
+      })
+      .catch(err => {
+        toggleLoader(false);
+        showToast("Ralat pelayan: Gagal menghubungi API Koku.", true);
+        console.error(err);
+      });
     }
 
     function paparPortalUtama() {
@@ -1169,11 +1240,9 @@
       muatSemuaDataMula();
     }
 
-    // LOG KELUAR SISTEM DENGAN PEMBERSIHAN SESI & CATATAN LOG
     function handleLogout() {
       if (typeof toggleLoader === 'function') toggleLoader(true);
 
-      fetch(API_URL + "
       google.script.run
         .withSuccessHandler(function() {
           prosesLogKeluarBersih();
@@ -1252,16 +1321,6 @@
       showSection('sectionDashboard');
     }
 
-    // PROFILE MODAL
-    function openProfileModal() {
-      document.getElementById('modalProfil').classList.remove('hidden');
-    }
-    function closeProfileModal() {
-      document.getElementById('modalProfil').classList.add('hidden');
-      document.getElementById('formProfil').reset();
-    }
-
-    // SEKSYEN NAVIGATION CONTROLLER
     function showSection(sectionId) {
       if(!sectionId) return;
       
@@ -1315,7 +1374,6 @@
       }
     }
 
-    // ASYNC DATA LOADING - DENGAN PENGENDALI RALAT BEBAS SILENT CRASH
     function muatSemuaDataMula() {
       const loaderStatus = document.getElementById('loaderStatus');
       if (loaderStatus) loaderStatus.classList.remove('hidden');
@@ -1374,16 +1432,13 @@
         .getPengurusanKoko();
     }
 
-    // FUNGSI UNTUK DAPATKAN NISBAH KEHADIRAN (HADIR / VALID LAPORAN)
     function dapatkanNisbahKehadiran(studentIc, unitName) {
       if (!unitName || unitName === "-" || unitName.trim() === "") return "-";
       
-      // Senarai perjumpaan yang SAH dilaporkan oleh guru untuk unit ini
       let reportedMeetings = allAktivitiKoko.filter(a => a.Nama_Unit === unitName && a.Tarikh && a.Tajuk);
-      let validMeetingNos = reportedMeetings.map(a => parseInt(a.Bil)); // Contoh: [1, 2, 4]
+      let validMeetingNos = reportedMeetings.map(a => parseInt(a.Bil)); 
       let totalReported = validMeetingNos.length;
       
-      // Ambil rekod kehadiran murid bagi unit ini
       let khd = rawKehadiranData.find(k => bersihkanIC(k.No_IC) === bersihkanIC(studentIc) && k.Nama_Unit === unitName);
       if (!khd) {
         return `${unitName} (0 / ${totalReported})`;
@@ -1399,15 +1454,12 @@
       return `${unitName} (${hadirCount} / ${totalReported})`;
     }
 
-    // --- SEKSYEN 1: DASHBOARD (DENGAN PENAPISAN PRESTASI GURU/MURID) ---
     function refreshDashboardView() {
       const loaderStatus = document.getElementById('loaderStatus');
       if (loaderStatus) loaderStatus.classList.remove('hidden');
       
       if (!userActive || !userActive.peranan) {
-        console.error("Gagal memuat dashboard: Data 'userActive' belum siap atau kosong.");
         if (loaderStatus) loaderStatus.classList.add('hidden');
-        alert("Data pengguna gagal dimuat. Sila muat semula halaman.");
         return;
       }
 
@@ -1427,7 +1479,6 @@
         })
         .withFailureHandler(function(error) {
           if (loaderStatus) loaderStatus.classList.add('hidden');
-          console.error("Ralat server pada getDashboardData:", error);
           showToast("Gagal mengambil data dashboard: " + error.message, true);
         })
         .getDashboardData(userActive.peranan, userActive.nama, userActive.ic);
@@ -1522,7 +1573,6 @@
       });
     }
 
-    // --- SEKSYEN 2: MAKLUMAT MURID ---
     function paparMaklumatMuridSection() {
       if(userActive.peranan === "Murid") {
         document.getElementById('detailMuridSendiri').classList.remove('hidden');
@@ -1536,7 +1586,6 @@
           document.getElementById('msKaumAgama').textContent = `${m.Kaum} / ${m.Agama}`;
           document.getElementById('msTelefon').textContent = `${m.No_Tel_Penjaga_1} (Utama) ${m.No_Tel_Penjaga_2 ? ', ' + m.No_Tel_Penjaga_2 : ''}`;
           
-          // Paparkan Nisbah Kehadiran murid secara dinamik
           document.getElementById('msUniform').textContent = m.Unit_Uniform ? dapatkanNisbahKehadiran(m.No_IC, m.Unit_Uniform) : "Belum didaftarkan";
           document.getElementById('msKelab').textContent = m.Kelab_Persatuan ? dapatkanNisbahKehadiran(m.No_IC, m.Kelab_Persatuan) : "Belum didaftarkan";
           document.getElementById('msSukan').textContent = m.Sukan_Permainan ? dapatkanNisbahKehadiran(m.No_IC, m.Sukan_Permainan) : "Belum didaftarkan";
@@ -1595,7 +1644,6 @@
       }
 
       filtered.forEach(m => {
-        // Mendapatkan Nisbah Kehadiran untuk setiap unit terdaftar murid yang dipapar
         let uniformText = m.Unit_Uniform ? dapatkanNisbahKehadiran(m.No_IC, m.Unit_Uniform) : "-";
         let kelabText = m.Kelab_Persatuan ? dapatkanNisbahKehadiran(m.No_IC, m.Kelab_Persatuan) : "-";
         let sukanText = m.Sukan_Permainan ? dapatkanNisbahKehadiran(m.No_IC, m.Sukan_Permainan) : "-";
@@ -1605,7 +1653,6 @@
           <tr class="hover:bg-slate-50 transition border-b">
             <td class="p-4">
               <div class="font-bold text-slate-800 text-sm">${m.Nama_Penuh}</div>
-              <!-- NOMBOR IC DIPELIHARA DAN DIPERBESARKAN DENGAN SAH -->
               <div class="text-sm font-extrabold text-indigo-600 mt-1 uppercase tracking-wider">IC: ${m.No_IC}</div>
               <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Kelas: ${m.Kelas}</div>
             </td>
@@ -1632,7 +1679,6 @@
       });
     }
 
-    // --- SEKSYEN 3: REKOD STATISTIK KEHADIRAN ADMIN ---
     function paparAdminKehadiran() {
       const thn = document.getElementById('adminKhdTahun').value;
       const tb = document.getElementById('tblAdminKhdBody');
@@ -1697,7 +1743,6 @@
         .getSemuaKehadiranAdmin();
     }
 
-    // --- SEKSYEN 4A: GURU PENANDAAN KEHADIRAN 1 CHECKBOX ---
     function paparKehadiranSection() {
       const sel = document.getElementById('selKokoKehadiran');
       sel.innerHTML = '';
@@ -1721,7 +1766,6 @@
         document.getElementById('btnSaveKehadiranAllTop').classList.add('hidden');
         document.getElementById('btnSaveKehadiranAllBottom').classList.add('hidden');
         
-        // PEMBERSIHAN PAPARAN MURID (AMARAN & MAKLUMAT JAWATAN/GURU PENASIHAT)
         const boxNotif = document.getElementById('boxNotifikasiKehadiran');
         boxNotif.className = "p-4 rounded-2xl font-bold text-xs uppercase tracking-wider bg-rose-50 text-rose-800 border border-rose-100 flex items-center";
         boxNotif.innerHTML = "<i class='fa-solid fa-circle-exclamation mr-2 text-sm'></i> Sila berjumpa dengan guru penasihat unit masing-masing sekiranya status kehadiran ada kesilapan.";
@@ -1778,7 +1822,6 @@
 
                 let k = rawKehadiranData.find(x => bersihkanIC(x.No_IC) === bersihkanIC(userActive.ic) && x.Nama_Unit === unit);
 
-                // Kemas kini kad metadata (Nama, Kelas, Jawatan, Guru Penasihat) secara automatik
                 google.script.run.withSuccessHandler(res => {
                   if (res && res.success) {
                     document.getElementById('lblInfoNama').innerText = res.nama;
@@ -1788,7 +1831,6 @@
                   }
                 }).dapatkanInfoMuridLengkap(userActive.ic, unit);
                 
-                // Bina struktur baris demi baris perjumpaan 1 hingga 12 untuk murid yang log masuk
                 for (let i = 1; i <= 12; i++) {
                   let act = (activities || []).find(a => parseInt(a.Bil) === i);
                   let tarikhStr = act ? act.Tarikh : '<span class="text-slate-400 italic">Belum Ditetapkan</span>';
@@ -1818,24 +1860,16 @@
               })
               .getAktivitiKoko(unit);
           } else {
-            // Paparan untuk Guru mengisi Kehadiran mengikut perjumpaan yang dipilih (1 Checkbox)
             google.script.run
               .withSuccessHandler(function(mList) {
                 toggleLoader(false);
                 let senaraiAsalAhli = (mList || []).filter(m => [m.Unit_Uniform, m.Kelab_Persatuan, m.Sukan_Permainan, m.Rumah_Sukan].includes(unit));
 
-                // 2. PROSES TAPISAN TAHUN (VERSI KEBAL & SELAMAT)
                 const tahunDipilih = document.getElementById('selTapisTahun').value;
                 if (tahunDipilih !== "SEMUA") {
                   senaraiAhliFiltered = senaraiAsalAhli.filter(m => {
-                    // Tukar data kelas kepada teks, buang ruang kosong, dan tukar ke Huruf Besar
                     let kelasString = m.Kelas ? m.Kelas.toString().trim().toUpperCase() : "";
-                    
-                    // Jika data kelas kosong, jangan buang terus, semak jika ada data alternatif
                     if (kelasString === "") return false;
-                    
-                    // Menguji sama ada teks kelas mengandungi digit tahun (contoh: mengandung angka "4", "5", atau "6")
-                    // Sama ada ditulis "4 Cerdik", "4C", "TAHUN 4" - semuanya akan lepas tapisan ini.
                     return kelasString.includes(tahunDipilih);
                   });
                 } else {
@@ -1859,14 +1893,12 @@
                 let bil = document.getElementById('selBilPerjumpaan').value;
                 document.getElementById('thKehadiran').textContent = `Hadir Perjumpaan ${bil}?`;
 
-                // KONTROL BUTANG ATAS (TOP)
                 const btnTop = document.getElementById('btnSaveKehadiranAllTop');
                 if (btnTop) {
                   btnTop.classList.remove('hidden');
                   btnTop.innerHTML = `<i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> SIMPAN PERJUMPAAN ${bil}`;
                 }
 
-                // KONTROL BUTANG BAWAH (BOTTOM)
                 const btnBottom = document.getElementById('btnSaveKehadiranAllBottom');
                 if (btnBottom) {
                   btnBottom.classList.remove('hidden');
@@ -1934,7 +1966,6 @@
         .simpanKehadiranAhli(listHantar, userActive.ic, userActive.nama);
     }
 
-    // --- SEKSYEN PERJUMPAAN MINGGUAN ---
     function paparPerjumpaanSection() {
       const sel = document.getElementById('selKokoPerjumpaan');
       sel.innerHTML = '<option value="">-- Pilih Unit Kokurikulum --</option>';
@@ -1950,7 +1981,6 @@
         sel.innerHTML += `<option value="${u.Nama_Unit}" data-cat="${u.Kategori}">${u.Nama_Unit} (${u.Kategori})</option>`;
       });
 
-      // Reset jadual perjumpaan
       document.getElementById('tblPerjumpaanBody').innerHTML = `
         <tr><td colspan="7" class="p-10 text-center text-slate-400 font-bold">Sila pilih unit kokurikulum di atas terlebih dahulu.</td></tr>
       `;
@@ -1976,12 +2006,10 @@
             return;
           }
 
-          // Isih perjumpaan mengikut nombor perjumpaan secara menaik
           filtered.sort((a,b) => parseInt(a.Bil) - parseInt(b.Bil));
 
           tbody.innerHTML = '';
           filtered.forEach((p, index) => {
-            // Pengiraan pecahan statistik kehadiran murid (Tahun 4, 5, 6)
             let totalThn4 = 0, hadirThn4 = 0;
             let totalThn5 = 0, hadirThn5 = 0;
             let totalThn6 = 0, hadirThn6 = 0;
@@ -2005,7 +2033,6 @@
               }
             });
 
-            // Pengiraan kehadiran guru penasihat
             let unitInfo = allKokoUnits.find(u => u.Nama_Unit === unit);
             let totalGurus = unitInfo ? (unitInfo.Guru_Penasihat || "").split(',').filter(x => x.trim()).length : 0;
             let hadirGurus = (p.Guru_Hadir || "").split(',').filter(x => x.trim()).length;
@@ -2058,33 +2085,12 @@
         .getAktivitiKoko(unit);
     }
 
-    function dapatkanBase64(file) {
-      return new Promise((resolve, reject) => {
-        if (!file) resolve({ data: null, name: "", type: "" });
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const dataUrl = reader.result;
-          const base64Data = dataUrl.split(',')[1];
-          resolve({
-            data: base64Data,
-            name: file.name,
-            type: file.type
-          });
-        };
-        reader.onerror = error => reject(error);
-      });
-    }
-
     function bukaModalPerjumpaan(id = '') {
-      const form = document.getElementById('formPerjumpaan');
-      
       document.getElementById('formPerjumpaan').reset();
-      document.getElementById('prmId').value = ''; // Membaiki rujukan pembolehubah ID perjumpaan tersembunyi
+      document.getElementById('prmId').value = ''; 
       document.getElementById('prmGuruChecklist').innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
       document.getElementById('modalPerjumpaanTitle').textContent = "Isi Laporan Perjumpaan Kokurikulum";
 
-      // Populasi senarai pilihan Unit Koko berdinamik mengikut kuasa hak guru/admin
       const prmUnit = document.getElementById('prmUnitKoko');
       prmUnit.innerHTML = '<option value="">-- Pilih Unit Koko --</option>';
       let listU = [];
@@ -2100,14 +2106,12 @@
       });
 
       if (id) {
-        // Mode kemas kini laporan lama
         let p = allAktivitiKoko.find(x => x.ID.toString() === id.toString());
         if (p) {
           document.getElementById('modalPerjumpaanTitle').textContent = "Kemaskini Laporan Perjumpaan";
           document.getElementById('prmId').value = p.ID;
           document.getElementById('prmUnitKoko').value = p.Nama_Unit;
           
-          // Populasi checklist guru penasihat secara langsung sebelum tick unit berkaitan
           populasiGuruPenasihatCheckbox();
 
           document.getElementById('prmBil').value = p.Bil;
@@ -2119,13 +2123,12 @@
           document.getElementById('prmImg2').value = p.Gambar_2 || '';
           document.getElementById('prmImg3').value = p.Gambar_3 || '';
 
-          // Tanda tick pada nama guru penasihat yang disimpan sebelum ini
           let checkedGurus = p.Guru_Hadir ? p.Guru_Hadir.split(',').map(x => x.trim()) : [];
           setTimeout(() => {
             document.querySelectorAll('input[name="prmGurus"]').forEach(c => {
               if (checkedGurus.includes(c.value)) c.checked = true;
             });
-          }, 100);
+          }, 200);
         }
       }
 
@@ -2136,106 +2139,6 @@
       document.getElementById('modalPerjumpaan').classList.add('hidden');
     }
 
-    // Pastikan fungsi ini wujud dalam skrip anda
-    function populasiGuruPenasihatCheckbox() {
-      const unitTerpilih = document.getElementById('prmUnitKoko').value;
-      const container = document.getElementById('prmGuruChecklist');
-      
-      if (!unitTerpilih) {
-        container.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
-        return;
-      }
-
-      // Cari unit tersebut dalam data global
-      const unitData = allKokoUnits.find(u => u.Nama_Unit === unitTerpilih);
-      if (unitData) {
-        // Tukar string guru kepada array
-        let senaraiGuru = unitData.Guru_Penasihat.split(',').map(g => g.trim());
-        container.innerHTML = senaraiGuru.map(g => `
-          <label class="flex items-center space-x-2">
-            <input type="checkbox" name="prmGurus" value="${g}" class="rounded">
-            <span>${g}</span>
-          </label>
-        `).join('');
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const prmUnitKoko = document.getElementById('prmUnitKoko');
-      if (prmUnitKoko) {
-        prmUnitKoko.addEventListener('change', populasiGuruPenasihatCheckbox);
-      }
-    });
-
-    async function simpanDataPerjumpaan() {
-      document.getElementById('modalPerjumpaan').classList.add('hidden');
-      // Tunjukkan loader jika anda mempunyai sistem loader (cth: toggleLoader(true))
-      if (typeof toggleLoader === 'function') toggleLoader(true);
-
-      try {
-        // 1. Ambil elemen fail imej dari HTML
-        const fileInput1 = document.getElementById('prmFile1');
-        const fileInput2 = document.getElementById('prmFile2');
-        const fileInput3 = document.getElementById('prmFile3');
-
-        // 2. Tukar fail imej kepada format Base64 (menggunakan fungsi helper)
-        const file1 = fileInput1 && fileInput1.files[0] ? await dapatkanBase64(fileInput1.files[0]) : null;
-        const file2 = fileInput2 && fileInput2.files[0] ? await dapatkanBase64(fileInput2.files[0]) : null;
-        const file3 = fileInput3 && fileInput3.files[0] ? await dapatkanBase64(fileInput3.files[0]) : null;
-
-        // 3. Ambil nilai checkbox guru yang dipilih
-        let guruHadir = [];
-        document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => {
-          guruHadir.push(c.value);
-        });
-
-        const prmUnit = document.getElementById('prmUnitKoko');
-        const kategoriTerpilih = prmUnit.options[prmUnit.selectedIndex]?.text.match(/\(([^)]+)\)/)?.[1] || "";
-
-        // 4. Bina objek data utama
-        let dataForm = {
-          ID: document.getElementById('prmId').value,
-          Nama_Unit: prmUnit.value,
-          Kategori: kategoriTerpilih,
-          Bil: document.getElementById('prmBil').value, 
-          Tarikh: document.getElementById('prmTarikh').value,
-          Tajuk: document.getElementById('prmTajuk').value,
-          Keterangan: document.getElementById('prmKeterangan').value,
-          Catatan: document.getElementById('prmCatatan').value,
-          Guru_Hadir: guruHadir.join(', ')
-        };
-
-        // 5. Satukan data borang dan data fail untuk dihantar ke backend
-        let payload = {
-          borang: dataForm,
-          fail1: file1,
-          fail2: file2,
-          fail3: file3
-        };
-
-        // 6. Hantar ke Google Apps Script backend
-        google.script.run
-          .withSuccessHandler(res => {
-            if (typeof toggleLoader === 'function') toggleLoader(false);
-            alert(res.message);
-            document.getElementById('modalPerjumpaan').classList.add('hidden');
-            
-            // Muat semula jadual/paparan senarai perjumpaan
-            if (typeof tapisLaporanPerjumpaan === 'function') {
-              tapisLaporanPerjumpaan();
-            }
-          })
-          .withFailureHandler(err => {
-            if (typeof toggleLoader === 'function') toggleLoader(false);
-            alert("Ralat sistem backend: " + err.message);
-          })
-          .simpanDataPerjumpaanBackend(payload);
-
-      } catch (error) {
-        if (typeof toggleLoader === 'function') toggleLoader(false);
-        alert("Gagal memproses fail imej: " + error.message);
-      }
-    }
     function populasiGuruPenasihatCheckbox() {
       const unit = document.getElementById('prmUnitKoko').value;
       const div = document.getElementById('prmGuruChecklist');
@@ -2264,92 +2167,72 @@
       }
     }
 
-    function handleSimpanPerjumpaan(e) {
-      e.preventDefault();
-      const unit = document.getElementById('prmUnitKoko').value;
-      if (!unit) {
-        showToast("Sila pilih unit kokurikulum terlebih dahulu!", true);
-        return;
+    document.addEventListener('DOMContentLoaded', () => {
+      const prmUnitKoko = document.getElementById('prmUnitKoko');
+      if (prmUnitKoko) {
+        prmUnitKoko.addEventListener('change', populasiGuruPenasihatCheckbox);
       }
+    });
 
-      let tickedGurus = [];
-      document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => tickedGurus.push(c.value));
+    async function simpanDataPerjumpaan() {
+      if (typeof toggleLoader === 'function') toggleLoader(true);
 
-      let opt = document.getElementById('prmUnitKoko').selectedOptions[0];
-      let fullText = opt ? opt.text : "";
-      let kat = fullText.includes("Uniform") ? "Unit Uniform" : (fullText.includes("Kelab") ? "Kelab Persatuan" : (fullText.includes("Sukan") ? "Sukan Permainan" : "Rumah Sukan"));
+      try {
+        const fileInput1 = document.getElementById('prmFile1');
+        const fileInput2 = document.getElementById('prmFile2');
+        const fileInput3 = document.getElementById('prmFile3');
 
-      const activePerjumpaanData = {
-        ID_Aktiviti: document.getElementById('prmId').value, // Menggunakan rujukan prmId yang betul
-        Nama_Unit: unit,
-        Kategori: kat,
-        Bil_Perjumpaan: document.getElementById('prmBil').value,
-        Tarikh: document.getElementById('prmTarikh').value,
-        Tajuk_Aktiviti: document.getElementById('prmTajuk').value.toUpperCase(),
-        Keterangan: document.getElementById('prmKeterangan').value,
-        Catatan: document.getElementById('prmCatatan').value,
-        Guru_Hadir: tickedGurus.join(', '),
-        Gambar_1: document.getElementById('prmImg1').value,
-        Gambar_2: document.getElementById('prmImg2').value,
-        Gambar_3: document.getElementById('prmImg3').value
-      };
+        const file1 = fileInput1 && fileInput1.files[0] ? await dapatkanBase64(fileInput1.files[0]) : null;
+        const file2 = fileInput2 && fileInput2.files[0] ? await dapatkanBase64(fileInput2.files[0]) : null;
+        const file3 = fileInput3 && fileInput3.files[0] ? await dapatkanBase64(fileInput3.files[0]) : null;
 
-      toggleLoader(true);
-      google.script.run
-        .withSuccessHandler(function(res) {
-          toggleLoader(false);
-          if (res.success) {
-            showToast(res.message);
-            closeModalPerjumpaan();
-            
-            // Reload senarai
-            google.script.run.withSuccessHandler(function(aktivitiData) {
-              allAktivitiKoko = aktivitiData || [];
-              
-              // Set filter dropdown pada unit yang baru diisi untuk segarkan senarai
-              document.getElementById('selKokoPerjumpaan').value = unit;
-              tapisLaporanPerjumpaan();
-            }).getAktivitiKoko(null);
-          } else {
-            showToast(res.message, true);
-          }
-        })
-        .withFailureHandler(function(err) {
-          toggleLoader(false);
-          showToast("Ralat menyimpan laporan perjumpaan: " + err.message, true);
-        })
-        .simpanAktivitiKoko(activePerjumpaanData, userActive.ic, userActive.nama);
-    }
+        let guruHadir = [];
+        document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => {
+          guruHadir.push(c.value);
+        });
 
-    function uploadGambar(no){
-      const file =
-        document.getElementById("uploadImg"+no).files[0];
-      if(!file){
-        alert("Sila pilih gambar dahulu");
-        return;
-      }
-      const unit = document.getElementById("prmUnitKoko").value;
-      const bil = document.getElementById("prmBil").value;
-      const reader = new FileReader();
-      reader.onload = function(e){
-        const base64 =
-          e.target.result.split(",")[1];
+        const prmUnit = document.getElementById('prmUnitKoko');
+        const kategoriTerpilih = prmUnit.options[prmUnit.selectedIndex]?.text.match(/\(([^)]+)\)/)?.[1] || "";
+
+        let dataForm = {
+          ID: document.getElementById('prmId').value,
+          Nama_Unit: prmUnit.value,
+          Kategori: kategoriTerpilih,
+          Bil: document.getElementById('prmBil').value, 
+          Tarikh: document.getElementById('prmTarikh').value,
+          Tajuk: document.getElementById('prmTajuk').value,
+          Keterangan: document.getElementById('prmKeterangan').value,
+          Catatan: document.getElementById('prmCatatan').value,
+          Guru_Hadir: guruHadir.join(', ')
+        };
+
+        let payload = {
+          borang: dataForm,
+          fail1: file1,
+          fail2: file2,
+          fail3: file3
+        };
+
         google.script.run
-          .withSuccessHandler(function(result){
-            document.getElementById("prmImg"+no).value =
-              result.url;
-            const preview =
-              document.getElementById("preview"+no);
-            preview.src = result.url;
-            preview.classList.remove("hidden");
-            alert("Upload berjaya");
+          .withSuccessHandler(res => {
+            if (typeof toggleLoader === 'function') toggleLoader(false);
+            alert(res.message);
+            document.getElementById('modalPerjumpaan').classList.add('hidden');
+            
+            if (typeof tapisLaporanPerjumpaan === 'function') {
+              tapisLaporanPerjumpaan();
+            }
           })
-          .withFailureHandler(function(err){
-            alert(err.message);
+          .withFailureHandler(err => {
+            if (typeof toggleLoader === 'function') toggleLoader(false);
+            alert("Ralat sistem backend: " + err.message);
           })
-          .uploadImageToDrive(file.name, file.type, base64, unit, bil);
-      };
-      reader.readAsDataURL(file);
+          .simpanDataPerjumpaanBackend(payload);
+
+      } catch (error) {
+        if (typeof toggleLoader === 'function') toggleLoader(false);
+        alert("Gagal memproses fail imej: " + error.message);
+      }
     }
 
     function handlePadamPerjumpaan(id) {
@@ -2361,7 +2244,6 @@
           if(res.success) {
             showToast(res.message);
             
-            // Reload senarai
             const activeUnit = document.getElementById('selKokoPerjumpaan').value;
             google.script.run.withSuccessHandler(function(aktivitiData) {
               allAktivitiKoko = aktivitiData || [];
@@ -2378,7 +2260,6 @@
         .padamAktivitiKoko(id, userActive.ic, userActive.nama);
     }
 
-    // --- SEKSYEN 4C: JAWATAN AHLI PAGE ---
     function paparJawatanSection() {
       let sel = document.getElementById('selKokoJawatan');
       sel.innerHTML = '';
@@ -2415,7 +2296,7 @@
                 <option value="Penolong Setiausaha" ${j==='Penolong Setiausaha'?'selected':''}>Pen. Setiausaha</option>
                 <option value="Bendahari" ${j==='Bendahari'?'selected':''}>Bendahari</option>
                 <option value="Penolong Bendahari" ${j==='Penolong Bendahari'?'selected':''}>Pen. Bendahari</option>
-                <option value="Ahli Jawatankuasa" ${j==='Ahli Jawatankuasa'?'selected':''}>AJK</option>
+                <option value="Ahli Jawatankuaka" ${j==='Ahli Jawatankuasa'?'selected':''}>AJK</option>
               </select>
             </td>
           </tr>
@@ -2449,7 +2330,6 @@
         .simpanKehadiranAhli(hantar, userActive.ic, userActive.nama);
     }
 
-    // --- SEKSYEN 5: PENGURUSAN GURU DAN PENGGUNA ---
     function paparDataPenggunaSection() {
       const tbody = document.getElementById('tblSenaraiGuru');
       if(!tbody) return;
@@ -2471,7 +2351,6 @@
                 return `<span class="inline-block bg-indigo-50 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-indigo-100 shadow-sm mr-1.5 mb-1.5">${unitTrimmed}</span>`;
               }).join('');
             } else {
-              // Jika tiada unit ditugaskan
               unitBadges = `<span class="inline-block bg-slate-100 text-slate-500 text-xs font-medium px-2.5 py-1 rounded-full italic">${g.unitKoko || 'Tiada Unit'}</span>`;
             }
             
@@ -2496,7 +2375,6 @@
         .ambilSenaraiGuru();
     }
 
-    // --- SEKSYEN 6: PENGURUSAN UNIT MASTER (ADMIN) ---
     function paparPengurusanKokoSection() {
       google.script.run
         .withSuccessHandler(function(guruList) {
@@ -2584,6 +2462,10 @@
     function handlePadamKoko(namaUnit) {
       if(!confirm(`Adakah anda pasti untuk memadam unit "${namaUnit}"?`)) return;
 
+      const kokoData = {
+        Nama_Unit: namaUnit
+      };
+
       toggleLoader(true);
       google.script.run
         .withSuccessHandler(function(res) {
@@ -2598,7 +2480,6 @@
         .simpanPengurusanKoko(kokoData, userActive.ic, userActive.nama);
     }
 
-    // --- SEKSYEN 7: REKOD PENCAPAIAN ---
     function paparPencapaianSection() {
       const tbody = document.getElementById('tblPencapaianBody');
       if(!tbody) return;
@@ -2608,7 +2489,7 @@
       google.script.run
         .withSuccessHandler(function(data) {
           dataPencapaianSemasa = data || []; 
-          halamanPencapaianSemasa = 1; // Set semula ke muka surat 1 setiap kali segarkan data
+          halamanPencapaianSemasa = 1; 
           filterPencapaian();
         })
         .withFailureHandler(function() {
@@ -2656,14 +2537,12 @@
         return pembimbing.includes(guruPP) || pengiring.includes(guruPP);
       });
 
-      // --- KAWALAN PAGINATION (KEMAS KINI STATUS BUTTON) ---
       let totalPages = Math.ceil(f.length / itemSatuMuka) || 1;
       if(pencapaianPage < 1) pencapaianPage = 1;
       if(pencapaianPage > totalPages) pencapaianPage = totalPages;
 
       document.getElementById('pencapaianPageInfo').textContent = `Muka surat ${pencapaianPage} daripada ${totalPages} (${f.length} Rekod)`;
       
-      // Hidupkan/Matikan butang secara fizikal mengikut kedudukan muka surat
       const btnPrev = document.getElementById('btnPrevPencapaian');
       const btnNext = document.getElementById('btnNextPencapaian');
       if(btnPrev) btnPrev.disabled = (pencapaianPage === 1);
@@ -2678,7 +2557,6 @@
         return;
       }
 
-      // --- JADUAL ASAL CIKGU (KEKAL 100%) ---
       pageData.forEach(p => {
         let ics = (p.Ahli_Terlibat || "").split(',').map(s=>bersihkanIC(s)).filter(s=>s);
         let names = [];
@@ -2736,7 +2614,6 @@
             <td class="p-4">
               <div class="max-h-24 overflow-y-auto leading-relaxed text-[10px] text-slate-600 space-y-0.5 font-bold">${names.join('<br>')}</div>
             </td>
-            <!-- LAJUR BAHARU: MENUNJUKKAN GURU PEMBIMBING & GURU PENGIRING DENGAN JELAS -->
             <td class="p-4 font-semibold text-slate-600 space-y-1">
               <div><span class="text-[9px] text-slate-400 font-bold uppercase block">Pembimbing:</span> ${p.Guru_Pembimbing || '-'}</div>
               <div class="mt-1"><span class="text-[9px] text-indigo-400 font-bold uppercase block">Pengiring:</span> ${p.Guru_Pengiring || '-'}</div>
@@ -2756,17 +2633,14 @@
       document.querySelectorAll('.actions-col').forEach(c => c.classList.toggle('hidden', userActive.peranan === "Murid"));
     }
 
-    // Fungsi apabila butang "Sebelumnya" ditekan
     function pencapaianHalamanSebelumnya() {
       if (pencapaianPage > 1) {
         pencapaianPage--;
-        filterPencapaian(); // Jalankan semula filter untuk muka surat baharu
+        filterPencapaian();
       }
     }
 
-    // Fungsi apabila butang "Seterusnya" ditekan
     function pencapaianHalamanSeterusnya() {
-      // Kira total data ditapis semasa untuk hadkan pergerakan maksimum
       let keyword = document.getElementById('cariPencapaianKeyword').value.toLowerCase().trim();
       let bln = document.getElementById('filterBulan').value;
       let kat = document.getElementById('filterKategoriPencapaian').value;
@@ -2790,11 +2664,10 @@
 
       if (pencapaianPage < totalPages) {
         pencapaianPage++;
-        filterPencapaian(); // Jalankan semula filter untuk muka surat baharu
+        filterPencapaian();
       }
     }
 
-    // --- PRA-TONTON IC BERGERAK LANGSUNG (LIVE IC PREVIEW) ---
     function updateLiveICPreview() {
       const textarea = document.getElementById('pPesertaList');
       const container = document.getElementById('icPreviewContainer');
@@ -2909,10 +2782,7 @@
         Diisi_Oleh: userActive.nama
       };
 
-      // 1. Hide modal immediately so the user feels the action was taken
       closeModalPencapaian(); 
-
-      // 2. Launch the loader
       toggleLoader(true);
 
       google.script.run
@@ -2956,7 +2826,6 @@
         .padamPencapaian(id, userActive.ic, userActive.nama);
     }
 
-    // UPDATE MASTER KOKURIKULUM DROPDOWNS
     function updateDropdownsKokoMurid() {
       let u = document.getElementById('mSelUniform');
       let k = document.getElementById('mSelKelab');
@@ -2973,13 +2842,6 @@
       });
     }
 
-    // PROFILE KEMASKINI CONTROLLER
-    function openProfileModal() {
-      document.getElementById('modalProfil').classList.remove('hidden');
-    }
-    function closeProfileModal() {
-      document.getElementById('modalProfil').classList.add('hidden');
-    }
     function handleUpdateProfil(e) {
       e.preventDefault();
       let pass = document.getElementById('profPass').value, conf = document.getElementById('profPassConfirm').value, f = document.getElementById('picInput');
@@ -3001,6 +2863,7 @@
         r.readAsDataURL(f.files[0]);
       } else hantarUpdateProfil(pass, null);
     }
+
     function hantarUpdateProfil(p, i) {
       google.script.run.withSuccessHandler(res => {
         toggleLoader(false);
@@ -3012,7 +2875,6 @@
       }).updateProfile(userActive.ic, userActive.nama, p, i);
     }
 
-    // MODAL DAFTAR MURID (ADMIN)
     function bukaModalMurid(ic = '') {
       document.getElementById('formMurid').reset(); document.getElementById('mIc').disabled = false;
       document.getElementById('modalMuridTitle').textContent = "Pendaftaran Murid Baharu";
@@ -3067,7 +2929,5 @@
       }).simpanMaklumatMurid(d, userActive.ic, userActive.nama);
     }
   </script>
-</body>
-</html>
 </body>
 </html>
