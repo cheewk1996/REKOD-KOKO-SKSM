@@ -993,16 +993,16 @@
       document.getElementById("output").innerText =
         data.message;
     }
-    
     function loadData() {
       const script = document.createElement("script");
-      script.src = API_URL + "?callback=handleResponse";
+      script.src = "https://script.google.com/macros/s/AKfycbyL_lwsqNqOOb6X5huYfTUWvuzTiLDjOP0xn2K5gldEP5fDRxAm3gMgafRnVA4tUkVd/exec?callback=handleResponse";
       script.onerror = function () {
         document.getElementById("output").innerText =
-          "Failed to load API";
+          "❌ API NOT LOADING (check Apps Script deploy)";
       };
       document.body.appendChild(script);
     }
+    window.onload = loadData;
     window.onload = function() {
       var dataSesi = sessionStorage.getItem('userActive');
       
