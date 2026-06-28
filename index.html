@@ -1187,7 +1187,16 @@
       event.preventDefault();
       const ic = document.getElementById("loginIc").value.trim();
       const pass = document.getElementById("loginPass").value;
-
+    
+      // PERBAIKAN: Mengambil elemen tombol login
+      const btnLogin = document.getElementById("btnLogin");
+      
+      // PERBAIKAN: Mengubah teks tombol menjadi "Sila tunggu ..." dan menonaktifkannya agar tidak bisa ditekan ganda
+      if (btnLogin) {
+        btnLogin.disabled = true;
+        btnLogin.innerHTML = `Sila tunggu ... <i class="fa-solid fa-circle-notch animate-spin ml-1.5"></i>`;
+      }
+    
       toggleLoader(true);
       
       fetch(API_URL, {
@@ -1213,6 +1222,12 @@
           sessionStorage.setItem('userActive', JSON.stringify(userActive));
           paparPortalUtama();
         } else {
+          // PERBAIKAN: Jika log masuk gagal, kembalikan tombol ke keadaan semula
+          if (btnLogin) {
+            btnLogin.disabled = false;
+            btnLogin.innerHTML = `MASUK PORTAL <i class="fa-solid fa-right-to-bracket ml-1.5"></i>`;
+          }
+    
           const alertBox = document.getElementById('loginAlert');
           alertBox.textContent = data.message || "No. IC atau Kata Laluan salah.";
           alertBox.classList.remove('hidden');
@@ -1220,11 +1235,17 @@
       })
       .catch(err => {
         toggleLoader(false);
+        
+        // PERBAIKAN: Jika terjadi galat jaringan/server, kembalikan tombol ke keadaan semula
+        if (btnLogin) {
+          btnLogin.disabled = false;
+          btnLogin.innerHTML = `MASUK PORTAL <i class="fa-solid fa-right-to-bracket ml-1.5"></i>`;
+        }
+        
         showToast("Ralat pelayan: Gagal menghubungi API Koku.", true);
         console.error(err);
       });
     }
-
     function paparPortalUtama() {
       document.getElementById('loginPage').classList.add('hidden');
       document.getElementById('appPortal').classList.remove('hidden');
