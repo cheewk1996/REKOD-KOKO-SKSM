@@ -63,7 +63,7 @@
           <img src="https://i.imgur.com/LWnJWwH.png" alt="Logo Sekolah" class="mx-auto h-24 w-24 object-contain">
         </div>
         <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">PORTAL REKOD KOKU</h1>
-        <p class="text-sm text-slate-500 font-medium">Sesi Akademik 2026 [v1.4]</p>
+        <p class="text-sm text-slate-500 font-medium">Sesi Akademik 2026 [v1.5]</p>
       </div>
 
       <div id="loginAlert" class="hidden mb-6 p-4 rounded-xl text-xs font-semibold bg-rose-50 text-rose-800 border border-rose-100 text-center"></div>
@@ -405,7 +405,7 @@
           <div class="flex flex-col sm:flex-row items-end gap-5">
             <div class="w-full sm:w-auto">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Unit Koko Kendalian</label>
-              <select id="selKokoKehadiran" class="w-full sm:w-64 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"></select>
+              <select id="selKokoKehadiran" onchange="kemaskiniDropdownPerjumpaan()" class="w-full sm:w-64 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"></select>
             </div>
             <div class="w-full sm:w-auto">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tapis Tahun</label>
@@ -418,11 +418,7 @@
             </div>
             <div id="divPilihPerjumpaan" class="hidden w-full sm:w-auto">
               <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Pilih Bilangan Perjumpaan</label>
-              <select id="selBilPerjumpaan" class="w-full sm:w-36 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none">
-                <option value="1">Perjumpaan 1</option><option value="2">Perjumpaan 2</option><option value="3">Perjumpaan 3</option><option value="4">Perjumpaan 4</option>
-                <option value="5">Perjumpaan 5</option><option value="6">Perjumpaan 6</option><option value="7">Perjumpaan 7</option><option value="8">Perjumpaan 8</option>
-                <option value="9">Perjumpaan 9</option><option value="10">Perjumpaan 10</option><option value="11">Perjumpaan 11</option><option value="12">Perjumpaan 12</option>
-              </select>
+              <select id="selBilPerjumpaan" class="w-full sm:w-36 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-indigo-500 outline-none"></select>
             </div>
             <button onclick="paparKehadiranAhliGuru()" class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-3 rounded-2xl transition text-sm shadow-lg shadow-indigo-600/10">
               <i class="fa-solid fa-eye mr-2"></i> Papar Senarai Ahli
@@ -774,7 +770,6 @@
   <!-- MODAL PERJUMPAAN -->
   <div id="modalPerjumpaan" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
     <div class="bg-white rounded-3xl w-full max-w-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
-      
       <div class="p-6 pb-0">
         <h2 id="modalPerjumpaanTitle" class="text-xl font-bold text-slate-800">Isi Laporan Perjumpaan</h2>
       </div>
@@ -849,7 +844,6 @@
         <button type="button" onclick="document.getElementById('modalPerjumpaan').classList.add('hidden')" class="px-4 py-2 text-slate-600 font-bold hover:text-slate-800 transition">Batal</button>
         <button type="button" onclick="simpanDataPerjumpaan()" class="px-6 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-md">Simpan</button>
       </div>
-      
     </div>
   </div>
 
@@ -892,7 +886,7 @@
               <div>
                 <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Kemenangan / Kedudukan</label>
                 <select id="pKedudukan" required class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="Johan">Johan</option><option value="Naib Johan">Naib Johan</option><option value="Ketiga">Ketiga</option><option value="Keempat">Keempat</option><option value="Kelima">Kelima</option><option value="Penyertaan">Penyertaan</option><option value="Kelima">Anugerah Khas</option><option value="Penyertaan">Pengiktirafan</option>
+                  <option value="Johan">Johan</option><option value="Naib Johan">Naib Johan</option><option value="Ketiga">Ketiga</option><option value="Keempat">Keempat</option><option value="Kelima">Kelima</option><option value="Penyertaan">Penyertaan</option><option value="Penyertaan">Anugerah Khas</option><option value="Penyertaan">Pengiktirafan</option>
                 </select>
               </div>
             </div>
@@ -914,11 +908,26 @@
 
 
           <div class="space-y-4">
-            <!-- Box Input Ahli Pukal + Live IC Response -->
+            <!-- Box Input Ahli (Checklist Murid) -->
             <div class="bg-indigo-50 p-4 rounded-3xl border border-indigo-100/80">
-              <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1.5">No. IC Ahli Terlibat (Pukal: Pisahkan dengan koma ",")</label>
-              <textarea id="pPesertaList" oninput="updateLiveICPreview()" required rows="2" placeholder="Contoh: 100303037777, 100404048888" class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
-              <div id="icPreviewContainer" class="mt-2 text-[11px] text-indigo-900 font-bold leading-normal italic bg-white/60 p-2.5 rounded-xl border border-indigo-100/40">Sila masukkan No. IC untuk melihat pra-tonton nama.</div>
+              <label class="block text-xs font-bold text-indigo-800 uppercase tracking-wider mb-1.5">Senarai Ahli Terlibat (Sila Tick)</label>
+              
+              <!-- Kotak Carian -->
+              <div class="relative mb-2">
+                <input type="text" id="studentCheckFilter" placeholder="Cari nama atau kelas..." oninput="filterStudentTargetCheckboxes(this.value)" class="w-full p-2.5 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+              </div>
+              
+              <!-- Bekas Senarai Checkbox -->
+              <div id="studentCheckboxesContainer" class="h-40 overflow-y-auto space-y-1 bg-white p-2 rounded-xl border border-slate-200">
+                <!-- Checkbox akan dijana oleh JS di sini -->
+                <p class="text-xs text-slate-500 text-center mt-2">Memuatkan senarai murid...</p>
+              </div>
+              
+              <!-- Hidden textarea (MENGEKALKAN LOGIK SUBMIT SEDIA ADA) -->
+              <textarea id="pPesertaList" class="hidden" required></textarea>
+              
+              <!-- Live Preview Nama Murid Dipilih -->
+              <div id="icPreviewContainer" class="mt-2 text-[11px] text-indigo-900 font-bold leading-normal italic bg-white/60 p-2.5 rounded-xl border border-indigo-100/40">Tiada murid dipilih.</div>
             </div>
 
             <!-- Guru Pembimbing & Guru Pengiring -->
@@ -977,7 +986,7 @@
                 "ambilSenaraiGuru", "getSenaraiGuru", "getPengurusanKoko",
                 "simpanPengurusanKoko", "getPencapaian", "simpanPencapaian",
                 "padamPencapaian", "updateProfile", "simpanMaklumatMurid",
-                "getDashboardData", "getSemuaKehadiranAdmin", "uploadImageToDrive"
+                "getDashboardData", "getSemuaKehadiranAdmin"
               ];
               
               methods.forEach(method => {
@@ -1344,6 +1353,16 @@
       showSection('sectionDashboard');
     }
 
+    // PROFILE MODAL
+    function openProfileModal() {
+      document.getElementById('modalProfil').classList.remove('hidden');
+    }
+    function closeProfileModal() {
+      document.getElementById('modalProfil').classList.add('hidden');
+      document.getElementById('formProfil').reset();
+    }
+
+    // SEKSYEN NAVIGATION CONTROLLER
     function showSection(sectionId) {
       if(!sectionId) return;
       
@@ -1766,6 +1785,19 @@
         .getSemuaKehadiranAdmin();
     }
 
+    // --- SEKSYEN 4A: GURU PENANDAAN KEHADIRAN 1 CHECKBOX ---
+    function muatUnitKokoGuru(senaraiUnit) {
+        const sel = document.getElementById('selKokoKehadiran');
+        sel.innerHTML = '';
+        
+        senaraiUnit.forEach(unit => {
+            sel.innerHTML += `<option value="${unit}">${unit}</option>`;
+        });
+        
+        // UTAMA: Panggil fungsi ini sejurus selepas senarai unit dimasukkan!
+        kemaskiniDropdownPerjumpaan();
+    }
+
     function paparKehadiranSection() {
       const sel = document.getElementById('selKokoKehadiran');
       sel.innerHTML = '';
@@ -1801,6 +1833,47 @@
 
       document.getElementById('kehadiranTableContainer').classList.add('hidden');
       document.getElementById('cardInfoMurid').classList.add('hidden');
+    }
+
+        function kemaskiniDropdownPerjumpaan() {
+        const unitDipilih = document.getElementById('selKokoKehadiran').value;
+        const dropdownBil = document.getElementById('selBilPerjumpaan');
+        const divContainer = document.getElementById('divPilihPerjumpaan');
+        
+        // Pastikan container dropdown dipaparkan
+        if (divContainer) divContainer.classList.remove('hidden');
+        
+        // Kosongkan senarai dropdown sedia ada
+        dropdownBil.innerHTML = '';
+        
+        // Semakan keselamatan jika array allAktivitiKoko belum siap dimuat turun dari backend
+        const senaraiAktiviti = (typeof allAktivitiKoko !== 'undefined' && Array.isArray(allAktivitiKoko)) ? allAktivitiKoko : [];
+        
+        // Jana perjumpaan 1 hingga 12 beserta tarikh dari Sheet Aktiviti_Koko
+        for (let i = 1; i <= 12; i++) {
+            // Padankan Nama_Unit dan Bil_Perjumpaan
+            const aktiviti = senaraiAktiviti.find(a => 
+                a.Nama_Unit === unitDipilih && 
+                parseInt(a.Bil_Perjumpaan || a.Bil) === i
+            );
+            
+            const opt = document.createElement('option');
+            opt.value = i;
+            
+            if (aktiviti && aktiviti.Tarikh) {
+                // Formatkan tarikh jika Google Sheet mengembalikan format ISO (2026-03-15T00:00:00)
+                let tarikhPapar = aktiviti.Tarikh;
+                if (typeof tarikhPapar === 'string' && tarikhPapar.includes('T')) {
+                    tarikhPapar = tarikhPapar.split('T')[0];
+                }
+                
+                opt.textContent = `Perjumpaan ${i} (${tarikhPapar})`;
+            } else {
+                opt.textContent = `Perjumpaan ${i}`;
+            }
+            
+            dropdownBil.appendChild(opt);
+        }
     }
 
     function paparKehadiranAhliGuru() {
@@ -2107,8 +2180,28 @@
         })
         .getAktivitiKoko(unit);
     }
+    
+    function dapatkanBase64(file) {
+      return new Promise((resolve, reject) => {
+        if (!file) resolve({ data: null, name: "", type: "" });
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+          const dataUrl = reader.result;
+          const base64Data = dataUrl.split(',')[1];
+          resolve({
+            data: base64Data,
+            name: file.name,
+            type: file.type
+          });
+        };
+        reader.onerror = error => reject(error);
+      });
+    }
 
     function bukaModalPerjumpaan(id = '') {
+      const form = document.getElementById('formPerjumpaan');
+
       document.getElementById('formPerjumpaan').reset();
       document.getElementById('prmId').value = ''; 
       document.getElementById('prmGuruChecklist').innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
@@ -2163,30 +2256,25 @@
     }
 
     function populasiGuruPenasihatCheckbox() {
-      const unit = document.getElementById('prmUnitKoko').value;
-      const div = document.getElementById('prmGuruChecklist');
-      if (!unit) {
-        div.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
+      const unitTerpilih = document.getElementById('prmUnitKoko').value;
+      const container = document.getElementById('prmGuruChecklist');
+      
+      if (!unitTerpilih) {
+        container.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
         return;
       }
 
-      div.innerHTML = '';
-      let unitInfo = allKokoUnits.find(u => u.Nama_Unit === unit);
-      if (unitInfo && unitInfo.Guru_Penasihat) {
-        let listGurus = unitInfo.Guru_Penasihat.split(',');
-        listGurus.forEach(g => {
-          let namaG = g.trim();
-          if (namaG) {
-            div.innerHTML += `
-              <label class="flex items-center space-x-2.5 cursor-pointer py-1 hover:bg-slate-100 rounded px-1 transition">
-                <input type="checkbox" name="prmGurus" value="${namaG}" class="rounded text-indigo-600 focus:ring-indigo-500 w-4.5 h-4.5">
-                <span class="text-slate-700">${namaG}</span>
-              </label>
-            `;
-          }
-        });
-      } else {
-        div.innerHTML = '<span class="text-rose-400 italic">Tiada Guru Penasihat didaftarkan dalam unit ini.</span>';
+      // Cari unit tersebut dalam data global
+      const unitData = allKokoUnits.find(u => u.Nama_Unit === unitTerpilih);
+      if (unitData) {
+        // Tukar string guru kepada array
+        let senaraiGuru = unitData.Guru_Penasihat.split(',').map(g => g.trim());
+        container.innerHTML = senaraiGuru.map(g => `
+          <label class="flex items-center space-x-2">
+            <input type="checkbox" name="prmGurus" value="${g}" class="rounded">
+            <span>${g}</span>
+          </label>
+        `).join('');
       }
     }
 
@@ -2257,23 +2345,120 @@
         alert("Gagal memproses fail imej: " + error.message);
       }
     }
-    
-    function dapatkanBase64(file) {
-      return new Promise((resolve, reject) => {
-        if (!file) resolve({ data: null, name: "", type: "" });
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = () => {
-          const dataUrl = reader.result;
-          const base64Data = dataUrl.split(',')[1];
-          resolve({
-            data: base64Data,
-            name: file.name,
-            type: file.type
-          });
-        };
-        reader.onerror = error => reject(error);
-      });
+    function populasiGuruPenasihatCheckbox() {
+      const unit = document.getElementById('prmUnitKoko').value;
+      const div = document.getElementById('prmGuruChecklist');
+      if (!unit) {
+        div.innerHTML = '<span class="text-slate-400 italic">Sila pilih Unit Koko terlebih dahulu...</span>';
+        return;
+      }
+
+      div.innerHTML = '';
+      let unitInfo = allKokoUnits.find(u => u.Nama_Unit === unit);
+      if (unitInfo && unitInfo.Guru_Penasihat) {
+        let listGurus = unitInfo.Guru_Penasihat.split(',');
+        listGurus.forEach(g => {
+          let namaG = g.trim();
+          if (namaG) {
+            div.innerHTML += `
+              <label class="flex items-center space-x-2.5 cursor-pointer py-1 hover:bg-slate-100 rounded px-1 transition">
+                <input type="checkbox" name="prmGurus" value="${namaG}" class="rounded text-indigo-600 focus:ring-indigo-500 w-4.5 h-4.5">
+                <span class="text-slate-700">${namaG}</span>
+              </label>
+            `;
+          }
+        });
+      } else {
+        div.innerHTML = '<span class="text-rose-400 italic">Tiada Guru Penasihat didaftarkan dalam unit ini.</span>';
+      }
+    }
+
+    function handleSimpanPerjumpaan(e) {
+      e.preventDefault();
+      const unit = document.getElementById('prmUnitKoko').value;
+      if (!unit) {
+        showToast("Sila pilih unit kokurikulum terlebih dahulu!", true);
+        return;
+      }
+
+      let tickedGurus = [];
+      document.querySelectorAll('input[name="prmGurus"]:checked').forEach(c => tickedGurus.push(c.value));
+
+      let opt = document.getElementById('prmUnitKoko').selectedOptions[0];
+      let fullText = opt ? opt.text : "";
+      let kat = fullText.includes("Uniform") ? "Unit Uniform" : (fullText.includes("Kelab") ? "Kelab Persatuan" : (fullText.includes("Sukan") ? "Sukan Permainan" : "Rumah Sukan"));
+
+      const activePerjumpaanData = {
+        ID_Aktiviti: document.getElementById('prmId').value, // Menggunakan rujukan prmId yang betul
+        Nama_Unit: unit,
+        Kategori: kat,
+        Bil_Perjumpaan: document.getElementById('prmBil').value,
+        Tarikh: document.getElementById('prmTarikh').value,
+        Tajuk_Aktiviti: document.getElementById('prmTajuk').value.toUpperCase(),
+        Keterangan: document.getElementById('prmKeterangan').value,
+        Catatan: document.getElementById('prmCatatan').value,
+        Guru_Hadir: tickedGurus.join(', '),
+        Gambar_1: document.getElementById('prmImg1').value,
+        Gambar_2: document.getElementById('prmImg2').value,
+        Gambar_3: document.getElementById('prmImg3').value
+      };
+
+      toggleLoader(true);
+      google.script.run
+        .withSuccessHandler(function(res) {
+          toggleLoader(false);
+          if (res.success) {
+            showToast(res.message);
+            closeModalPerjumpaan();
+            
+            // Reload senarai
+            google.script.run.withSuccessHandler(function(aktivitiData) {
+              allAktivitiKoko = aktivitiData || [];
+              
+              // Set filter dropdown pada unit yang baru diisi untuk segarkan senarai
+              document.getElementById('selKokoPerjumpaan').value = unit;
+              tapisLaporanPerjumpaan();
+            }).getAktivitiKoko(null);
+          } else {
+            showToast(res.message, true);
+          }
+        })
+        .withFailureHandler(function(err) {
+          toggleLoader(false);
+          showToast("Ralat menyimpan laporan perjumpaan: " + err.message, true);
+        })
+        .simpanAktivitiKoko(activePerjumpaanData, userActive.ic, userActive.nama);
+    }
+
+    function uploadGambar(no){
+      const file =
+        document.getElementById("uploadImg"+no).files[0];
+      if(!file){
+        alert("Sila pilih gambar dahulu");
+        return;
+      }
+      const unit = document.getElementById("prmUnitKoko").value;
+      const bil = document.getElementById("prmBil").value;
+      const reader = new FileReader();
+      reader.onload = function(e){
+        const base64 =
+          e.target.result.split(",")[1];
+        google.script.run
+          .withSuccessHandler(function(result){
+            document.getElementById("prmImg"+no).value =
+              result.url;
+            const preview =
+              document.getElementById("preview"+no);
+            preview.src = result.url;
+            preview.classList.remove("hidden");
+            alert("Upload berjaya");
+          })
+          .withFailureHandler(function(err){
+            alert(err.message);
+          })
+          .uploadImageToDrive(file.name, file.type, base64, unit, bil);
+      };
+      reader.readAsDataURL(file);
     }
     
     function handlePadamPerjumpaan(id) {
@@ -2337,7 +2522,7 @@
                 <option value="Penolong Setiausaha" ${j==='Penolong Setiausaha'?'selected':''}>Pen. Setiausaha</option>
                 <option value="Bendahari" ${j==='Bendahari'?'selected':''}>Bendahari</option>
                 <option value="Penolong Bendahari" ${j==='Penolong Bendahari'?'selected':''}>Pen. Bendahari</option>
-                <option value="Ahli Jawatankuaka" ${j==='Ahli Jawatankuasa'?'selected':''}>AJK</option>
+                <option value="Ahli Jawatankuasa" ${j==='Ahli Jawatankuasa'?'selected':''}>AJK</option>
               </select>
             </td>
           </tr>
@@ -2738,10 +2923,14 @@
 
     function bukaModalPencapaian(id='') {
       document.getElementById('formPencapaian').reset();
-      document.getElementById('icPreviewContainer').innerHTML = 'Sila masukkan No. IC untuk melihat pra-tonton nama.';
       document.getElementById('pId').value = '';
       document.getElementById('modalPencapaianTitle').textContent = "Isi Rekod Pencapaian & Program Murid";
 
+      const inputFilter = document.getElementById('studentCheckFilter');
+      if (inputFilter) inputFilter.value = '';
+
+      renderSenaraiSemakMurid();
+      preTickMurid(''); 
       google.script.run
         .withSuccessHandler(function(guruList) {
           let gp1 = document.getElementById('pilihGuruPembimbingList');
@@ -2787,8 +2976,121 @@
       document.getElementById('modalPencapaian').classList.remove('hidden');
     }
 
+    function preTickMurid(senaraiIC_Disimpan) {
+        // 1. Nyahtanda (uncheck) semua kotak terlebih dahulu untuk mengelakkan rekod bertindih
+        const allCheckboxes = document.querySelectorAll('.murid-checkbox');
+        allCheckboxes.forEach(chk => chk.checked = false);
+
+        // 2. Jika tiada data IC tersimpan, kemas kini paparan kepada kosong dan berhenti
+        if (!senaraiIC_Disimpan || senaraiIC_Disimpan.trim() === '') {
+            kemaskiniPilihanMurid();
+            return;
+        }
+
+        // 3. Pecahkan rentetan nombor IC kepada array
+        const arrayIC = senaraiIC_Disimpan.split(',').map(ic => ic.trim());
+
+        // 4. Tandakan (tick) kotak yang sepadan dengan setiap nombor IC
+        arrayIC.forEach(ic => {
+            const idInput = `chk_murid_${ic}`; 
+            const checkbox = document.getElementById(idInput);
+            
+            if (checkbox) {
+                checkbox.checked = true;
+            } else {
+                console.warn(`Murid dengan IC ${ic} tidak dijumpai dalam senarai.`);
+            }
+        });
+
+        // 5. Kemas kini textarea tersembunyi dan paparan nama (Live Preview)
+        kemaskiniPilihanMurid();
+    }
+
     function closeModalPencapaian() {
       document.getElementById('modalPencapaian').classList.add('hidden');
+    }
+
+        // 1. Fungsi untuk menjana senarai murid dari array allMurids
+    function renderSenaraiSemakMurid() {
+        const container = document.getElementById('studentCheckboxesContainer');
+        container.innerHTML = ''; 
+        
+        if (!allMurids || allMurids.length === 0) {
+          container.innerHTML = '<p class="text-xs text-slate-500 text-center py-2">Data murid belum tersedia.</p>';
+          return;
+        }
+
+        // 1. Susun murid mengikut abjad menggunakan 'Nama_Penuh'
+        const muridDisusun = [...allMurids].sort((a, b) => {
+          const namaA = String(a?.Nama_Penuh || a?.Nama || '');
+          const namaB = String(b?.Nama_Penuh || b?.Nama || '');
+          return namaA.localeCompare(namaB);
+        });
+
+        muridDisusun.forEach(murid => {
+          // 2. Petik 'Nama_Penuh' dari Google Sheets
+          const namaMurid = murid.Nama_Penuh || murid.Nama || 'Tanpa Nama';
+          const kelasMurid = murid.Kelas || '';
+          const ic = bersihkanIC(murid.No_IC || '');
+          const idInput = `chk_murid_${ic}`;
+          
+          const row = document.createElement('div');
+          row.className = 'student-target-row flex items-center p-1.5 hover:bg-slate-50 rounded cursor-pointer border-b border-slate-50 last:border-0';
+          
+          row.setAttribute('data-name', namaMurid.toLowerCase());
+          row.setAttribute('data-class', kelasMurid.toLowerCase());
+          
+          row.innerHTML = `
+              <input type="checkbox" id="${idInput}" value="${ic}" class="murid-checkbox mr-3 h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" onchange="kemaskiniPilihanMurid()">
+              <label for="${idInput}" class="text-xs font-semibold text-slate-700 cursor-pointer flex-1 flex justify-between">
+                <span>${namaMurid}</span>
+                <span class="text-indigo-500 ml-2">${kelasMurid}</span>
+              </label>
+          `;
+          container.appendChild(row);
+        });
+    }
+
+    // 2. Fungsi tapisan / search live
+    function filterStudentTargetCheckboxes(query) {
+        const q = query.trim().toLowerCase();
+        const rows = document.querySelectorAll('.student-target-row');
+        
+        rows.forEach(row => {
+            const name = row.getAttribute('data-name');
+            const classCode = row.getAttribute('data-class');
+            
+            if (name.includes(q) || classCode.includes(q)) {
+                row.style.display = 'flex';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+
+    // 3. Fungsi kemas kini hidden textarea dan preview
+    function kemaskiniPilihanMurid() {
+        const checkboxes = document.querySelectorAll('.murid-checkbox:checked');
+        const selectedICs = [];
+        const selectedNames = [];
+        
+        checkboxes.forEach(chk => {
+            selectedICs.push(chk.value);
+            const label = chk.nextElementSibling;
+            const name = label.querySelector('span').textContent;
+            selectedNames.push(name);
+        });
+        
+        // Masukkan IC ke dalam textarea (menggunakan koma)
+        document.getElementById('pPesertaList').value = selectedICs.join(', ');
+        
+        // Kemas kini kotak makluman (Live Preview)
+        const preview = document.getElementById('icPreviewContainer');
+        if(selectedNames.length > 0) {
+            preview.innerHTML = `<strong>Murid Dipilih (${selectedNames.length}):</strong><br><span class="text-slate-600">${selectedNames.join(', ')}</span>`;
+        } else {
+            preview.innerHTML = 'Tiada murid dipilih.';
+        }
     }
 
     function handleSimpanPencapaian(e) {
@@ -2883,6 +3185,13 @@
       });
     }
 
+    // PROFILE KEMASKINI CONTROLLER
+    function openProfileModal() {
+      document.getElementById('modalProfil').classList.remove('hidden');
+    }
+    function closeProfileModal() {
+      document.getElementById('modalProfil').classList.add('hidden');
+    }
     function handleUpdateProfil(e) {
       e.preventDefault();
       let pass = document.getElementById('profPass').value, conf = document.getElementById('profPassConfirm').value, f = document.getElementById('picInput');
