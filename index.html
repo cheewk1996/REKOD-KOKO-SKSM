@@ -44,7 +44,7 @@
 <body class="bg-slate-50 font-sans text-slate-800">
 
   <!-- LOADING SPINNER -->
-  <div id="loader" class="hidden fixed inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-60">
+  <div id="loader" class="hidden fixed inset-0 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm z-100">
     <div class="flex flex-col items-center bg-white p-6 rounded-3xl shadow-xl border border-slate-100">
       <i class="fa-solid fa-circle-notch animate-spin text-4xl text-indigo-600 mb-3"></i>
       <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Sedang memproses...</p>
@@ -986,7 +986,7 @@
                 "ambilSenaraiGuru", "getSenaraiGuru", "getPengurusanKoko",
                 "simpanPengurusanKoko", "getPencapaian", "simpanPencapaian",
                 "padamPencapaian", "updateProfile", "simpanMaklumatMurid",
-                "getDashboardData", "getSemuaKehadiranAdmin"
+                "getDashboardData", "getSemuaKehadiranAdmin", "uploadImageToDrive"
               ];
               
               methods.forEach(method => {
@@ -2244,7 +2244,7 @@
             document.querySelectorAll('input[name="prmGurus"]').forEach(c => {
               if (checkedGurus.includes(c.value)) c.checked = true;
             });
-          }, 200);
+          }, 100);
         }
       }
 
